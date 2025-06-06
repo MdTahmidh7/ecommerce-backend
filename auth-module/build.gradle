@@ -1,0 +1,64 @@
+// auth-module/build.gradle
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.0'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'maven-publish' // <--- THIS IS THE MISSING LINE!
+}
+
+group = 'com.ecommerce.eshop.authmodule' // Ensure this group matches your main project's base package
+version = '0.0.1-SNAPSHOT'
+
+// --- ADD THIS BLOCK FOR PUBLISHING CONFIGURATION ---
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId = project.group
+			artifactId = 'auth-module' // The name your main project will refer to it by
+			version = project.version
+
+			from components.java
+		}
+	}
+}
+// --- END PUBLISHING CONFIGURATION ---
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'com.h2database:h2'
+
+	// Your JJWT versions (ensure these match your main project's if possible, or keep them consistent)
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
