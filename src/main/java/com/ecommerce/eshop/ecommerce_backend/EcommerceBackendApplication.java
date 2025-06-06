@@ -7,8 +7,8 @@ import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServic
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication(exclude = {
-		SecurityAutoConfiguration.class,           // Exclude default Spring Security auto-configuration
-		UserDetailsServiceAutoConfiguration.class  // Exclude default UserDetailsService auto-configuration
+		SecurityAutoConfiguration.class,
+		UserDetailsServiceAutoConfiguration.class
 })
 @ComponentScan(basePackages = "com.ecommerce.eshop")
 public class EcommerceBackendApplication {
