@@ -67,6 +67,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
 
+                        // --- ADD THESE LINES FOR OTP MODULE ENDPOINTS ---
+                        .requestMatchers(HttpMethod.POST, "/api/otp/send").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/otp/verify").permitAll()
+                        // --- END ADDITION ---
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
