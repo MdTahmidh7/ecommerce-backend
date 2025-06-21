@@ -50,7 +50,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 "/api/auth/register",
-                                "/api/auth/login"
+                                "/api/auth/login",
+                                "api/divisions",
+                                "/api/divisions/**",
+                                "/api/districts",
+                                "/api/districts/**",
+                                "api/upazilas",
+                                "/api/upazilas/**"
                         ).permitAll()
 
                         .requestMatchers(
