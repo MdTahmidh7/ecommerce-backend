@@ -1,0 +1,64 @@
+version: '3.8' # Specify Docker Compose file format version
+
+services:
+  # Service for PostgreSQL Database
+  db:
+    image: postgres:16.3-alpine # Using a specific stable minor version for stability and alpine for small size
+    container_name: ecommerce_postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: ecommerce_db       # Your database name
+      POSTGRES_USER: eshop_user       # The database username
+      POSTGRES_PASSWORD: eshop_password # The database password (CHANGE THIS TO A STRONG PASSWORD)
+      # PGDATA: /var/lib/postgresql/data/mydata # Uncomment and adjust if you need a custom data directory within the volume
+    ports:
+      - "5432:5432" # Map host port 5432 to container port 5432 (optional, for connecting from your host)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistent volume to store database data
+
+  # Service for your Spring Boot Backend Application
+  backend:
+    build:
+      context: .          # Build context is the current directory (where Dockerfile is)
+      dockerfile: Dockerfile # Specify the Dockerfile to use
+    container_name: ecommerce_backend_app
+    restart: always
+    ports:
+      - "8080:8080" # Map host port 8080 to container port 8080
+    environment:
+      # --- Database connection details ---
+      # These variables will be picked up by Spring Boot and mapped to 'spring.datasource.*' properties.
+      # The hostname 'db' refers to the 'db' service defined in this same docker-compose.yml file.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ecommerce_db
+      SPRING_DATASOURCE_USERNAME: eshop_user
+      SPRING_DATASOURCE_PASSWORD: eshop_password # Must match POSTGRES_PASSWORD in 'db' service
+
+      # --- Spring Mailer credentials ---
+      # These will be picked up by Spring Boot and mapped to 'spring.mail.*' properties.
+      # Make sure these are securely set, especially in production.
+      SPRING_MAIL_HOST: smtp.gmail.com
+      SPRING_MAIL_PORT: 587
+      SPRING_MAIL_USERNAME: your.email@gmail.com # <--- IMPORTANT: REPLACE WITH YOUR ACTUAL GMAIL/SMTP EMAIL
+      SPRING_MAIL_PASSWORD: your_app_password     # <--- IMPORTANT: REPLACE WITH YOUR GMAIL APP PASSWORD (NOT YOUR REGULAR PASSWORD) OR SMTP PASSWORD
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
+
+      # --- OTP Module Configuration ---
+      # These will be picked up by Spring Boot and mapped to 'otp.*' properties.
+      OTP_VALIDITY_MINUTES: 5
+      OTP_RESEND_COOLDOWN_SECONDS: 60
+
+      # --- JWT Configuration
+      JWT_SECRET: SUxvdmVCYW5nbGFkZXNoSXRJc0FCZWF1dGlmdWxsQ291bnRyeQ==
+      JWT_EXPIRATION_MS: 3600000
+
+      # --- Spring Profile Activation ---
+      # This tells Spring Boot to load 'application-docker.properties'
+      SPRING_PROFILES_ACTIVE: docker
+
+    depends_on:
+      - db # Ensures the 'db' service starts and is healthy before the 'backend' service
+
+# Define named volumes for data persistence
+volumes:
+  postgres_data: # This volume will persist your PostgreSQL data, even if containers are removed
