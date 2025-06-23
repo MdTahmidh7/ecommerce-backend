@@ -29,8 +29,8 @@ public class ProductRequest {
     @DecimalMin(value = "0", inclusive = true, message = "Stock quantity cannot be negative")
     private Integer stockQuantity;
 
-    @Size(max = 500, message = "Image URL cannot exceed 500 characters")
-    private String imageUrl;
+//    @Size(max = 500, message = "Image URL cannot exceed 500 characters")
+//    private String imageUrl;
 
     @NotNull(message = "Category ID is required")
     private Long categoryId; // We will link by category ID in the request

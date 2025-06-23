@@ -4,6 +4,9 @@ import com.ecommerce.eshop.ecommerce_backend.payload.request.ProductRequest;
 import com.ecommerce.eshop.ecommerce_backend.payload.response.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface ProductService {
 
@@ -23,4 +26,11 @@ public interface ProductService {
 
     void deleteProduct(Long id);
 
+    ProductResponse createProductWithImages(ProductRequest productRequest, List<MultipartFile> images);
+
+    ProductResponse updateProductWithImages(Long id, ProductRequest productRequest, List<MultipartFile> images, boolean keepExistingImages);
+
+    ProductResponse addProductImages(Long id, List<MultipartFile> images);
+
+    ProductResponse removeProductImage(Long id, String imageUrl);
 }

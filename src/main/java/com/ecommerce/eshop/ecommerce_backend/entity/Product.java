@@ -1,5 +1,6 @@
 package com.ecommerce.eshop.ecommerce_backend.entity;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -13,6 +14,8 @@ import org.hibernate.annotations.SQLDelete;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products", uniqueConstraints = {
@@ -44,9 +47,14 @@ public class Product {
     @Column(name = "stock_quantity")
     private Integer stockQuantity;
 
+    // Getters and setters
+    @Getter
     @Column(name = "image_url")
     @Size(max = 500)
-    private String imageUrl;
+    private String imageUrl; //primary image URL
+
+    @Column(name = "image_urls", columnDefinition = "TEXT")
+    private String imageUrls;          // JSON array of multiple image URLs
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
@@ -61,6 +69,33 @@ public class Product {
 
     @Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
     private boolean isDeleted = false;
+
+    // Helper methods for image URLs
+    public List<String> getImageUrlsList() {
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return new ArrayList<>();
+        }
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(imageUrls,
+                    mapper.getTypeFactory().constructCollectionType(List.class, String.class));
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public void setImageUrlsList(List<String> urls) {
+        if (urls == null || urls.isEmpty()) {
+            this.imageUrls = null;
+            return;
+        }
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            this.imageUrls = mapper.writeValueAsString(urls);
+        } catch (Exception e) {
+            this.imageUrls = null;
+        }
+    }
 
     @PrePersist
     protected void onCreate() {

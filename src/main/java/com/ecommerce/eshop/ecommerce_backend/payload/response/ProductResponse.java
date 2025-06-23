@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -15,7 +16,8 @@ public class ProductResponse {
     private String description;
     private BigDecimal price;
     private Integer stockQuantity;
-    private String imageUrl;
+    private String imageUrl;           // Primary image
+    private List<String> imageUrls;    // All images
     private CategoryResponse category; // Nested CategoryResponse DTO
 
 }

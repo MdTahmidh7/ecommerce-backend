@@ -1,47 +1,58 @@
+// Updated ProductController.java
+
 package com.ecommerce.eshop.ecommerce_backend.controller;
 
 import com.ecommerce.eshop.ecommerce_backend.payload.request.ProductRequest;
 import com.ecommerce.eshop.ecommerce_backend.payload.response.ProductResponse;
 import com.ecommerce.eshop.ecommerce_backend.service.ProductService;
+import com.ecommerce.eshop.ecommerce_backend.service.MinIOService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault; // For default page size/sort
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize; // For role-based authorization
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/products") // Base URL for product endpoints
+@RequestMapping("/api/products")
 public class ProductController {
 
     private final ProductService productService;
+    private final MinIOService minIOService;
 
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, MinIOService minIOService) {
         this.productService = productService;
+        this.minIOService = minIOService;
     }
 
     /**
-     * Creates a new product.
+     * Creates a new product with optional images
      * Accessible by ADMIN.
      */
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(consumes = {"multipart/form-data"})
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(
-            @Valid @RequestBody ProductRequest productRequest
+            @Valid @RequestPart("product") ProductRequest productRequest,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
-        ProductResponse newProduct = productService.createProduct(productRequest);
-        return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
+        try {
+            ProductResponse newProduct = productService.createProductWithImages(productRequest, images);
+            return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     /**
      * Retrieves all non-deleted products with pagination.
-     * Accessible by ADMIN, USER.
-     * Example: GET /api/products?page=0&size=10&sort=name,asc
+     * Returns products with image URLs that can be directly used in <img> tags
      */
     @GetMapping
-    //@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Page<ProductResponse>> getAllProducts(
             @PageableDefault(page = 0, size = 10, sort = "name") Pageable pageable
     ) {
@@ -50,24 +61,70 @@ public class ProductController {
     }
 
     /**
-     * Retrieves a single non-deleted product by its ID.
-     * Accessible by ADMIN, USER.
+     * Retrieves a single product by ID with all image URLs
      */
     @GetMapping("/{id}")
-    //@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
-
         ProductResponse product = productService.getProductById(id);
         return ResponseEntity.ok(product);
     }
 
     /**
-     * Retrieves non-deleted products by Category ID with pagination.
-     * Accessible by ADMIN, USER.
-     * Example: GET /api/products/category/1?page=0&size=5
+     * Updates an existing product and optionally replaces images
      */
+    @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestPart("product") ProductRequest productRequest,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestParam(value = "keepExistingImages", defaultValue = "false") boolean keepExistingImages
+    ) {
+        try {
+            ProductResponse updatedProduct = productService.updateProductWithImages(
+                    id, productRequest, images, keepExistingImages);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Add images to existing product
+     */
+    @PostMapping("/{id}/images")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> addProductImages(
+            @PathVariable Long id,
+            @RequestPart("images") List<MultipartFile> images
+    ) {
+        try {
+            ProductResponse updatedProduct = productService.addProductImages(id, images);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Remove specific image from product
+     */
+    @DeleteMapping("/{id}/images")
+    //@PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> removeProductImage(
+            @PathVariable Long id,
+            @RequestParam String imageUrl
+    ) {
+        try {
+            ProductResponse updatedProduct = productService.removeProductImage(id, imageUrl);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    // ... rest of existing methods remain unchanged
     @GetMapping("/category/{categoryId}")
-    //@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Page<ProductResponse>> getProductsByCategoryId(
             @PathVariable Long categoryId,
             @PageableDefault(page = 0, size = 10, sort = "name") Pageable pageable
@@ -76,13 +133,7 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    /**
-     * Retrieves non-deleted products by Category Name with pagination.
-     * Accessible by ADMIN, USER.
-     * Example: GET /api/products/category/name/Electronics?page=0&size=5
-     */
     @GetMapping("/category/name/{categoryName}")
-    //@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Page<ProductResponse>> getProductsByCategoryName(
             @PathVariable String categoryName,
             @PageableDefault(page = 0, size = 10, sort = "name") Pageable pageable
@@ -91,13 +142,7 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    /**
-     * Searches for non-deleted products by name (case-insensitive) with pagination.
-     * Accessible by ADMIN, USER.
-     * Example: GET /api/products/search?keyword=phone&page=0&size=5
-     */
     @GetMapping("/search")
-    //@PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Page<ProductResponse>> searchProductsByName(
             @RequestParam String keyword,
             @PageableDefault(page = 0, size = 10, sort = "name") Pageable pageable
@@ -106,29 +151,10 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    /**
-     * Updates an existing product.
-     * Accessible by ADMIN.
-     */
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> updateProduct(
-            @PathVariable Long id,
-            @Valid @RequestBody ProductRequest productRequest
-    ) {
-        ProductResponse updatedProduct = productService.updateProduct(id, productRequest);
-        return ResponseEntity.ok(updatedProduct);
-    }
-
-    /**
-     * Soft deletes a product by its ID.
-     * Accessible by ADMIN.
-     */
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
-
         productService.deleteProduct(id);
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }

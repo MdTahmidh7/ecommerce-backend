@@ -27,7 +27,7 @@ public class CategoryController {
      * Accessible by ADMIN.
      */
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')") // Only ADMIN can create categories
+    //@PreAuthorize("hasRole('ADMIN')") // Only ADMIN can create categories
     public ResponseEntity<CategoryResponse> createCategory(
             @Valid @RequestBody CategoryRequest categoryRequest
     ) {

@@ -1,64 +1,96 @@
-version: '3.8' # Specify Docker Compose file format version
+version: '3.8'
 
 services:
-  # Service for PostgreSQL Database
+  # PostgreSQL Database
   db:
-    image: postgres:16.3-alpine # Using a specific stable minor version for stability and alpine for small size
+    image: postgres:16.3-alpine
     container_name: ecommerce_postgres_db
     restart: always
     environment:
-      POSTGRES_DB: ecommerce_db       # Your database name
-      POSTGRES_USER: eshop_user       # The database username
-      POSTGRES_PASSWORD: eshop_password # The database password (CHANGE THIS TO A STRONG PASSWORD)
-      # PGDATA: /var/lib/postgresql/data/mydata # Uncomment and adjust if you need a custom data directory within the volume
+      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: eshop_user
+      POSTGRES_PASSWORD: eshop_password
     ports:
-      - "5432:5432" # Map host port 5432 to container port 5432 (optional, for connecting from your host)
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Persistent volume to store database data
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ecommerce_network
 
-  # Service for your Spring Boot Backend Application
+  # MinIO Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: ecommerce_minio
+    restart: always
+    ports:
+      - "9000:9000"      # API port
+      - "9001:9001"      # Console UI port
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - ecommerce_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # Spring Boot Backend
   backend:
     build:
-      context: .          # Build context is the current directory (where Dockerfile is)
-      dockerfile: Dockerfile # Specify the Dockerfile to use
+      context: .
+      dockerfile: Dockerfile
     container_name: ecommerce_backend_app
     restart: always
     ports:
-      - "8080:8080" # Map host port 8080 to container port 8080
+      - "8080:8080"
     environment:
-      # --- Database connection details ---
-      # These variables will be picked up by Spring Boot and mapped to 'spring.datasource.*' properties.
-      # The hostname 'db' refers to the 'db' service defined in this same docker-compose.yml file.
+      # Database Configuration
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/ecommerce_db
       SPRING_DATASOURCE_USERNAME: eshop_user
-      SPRING_DATASOURCE_PASSWORD: eshop_password # Must match POSTGRES_PASSWORD in 'db' service
+      SPRING_DATASOURCE_PASSWORD: eshop_password
 
-      # --- Spring Mailer credentials ---
-      # These will be picked up by Spring Boot and mapped to 'spring.mail.*' properties.
-      # Make sure these are securely set, especially in production.
+      # MinIO Configuration
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      MINIO_BUCKET_NAME: ecommerce-products
+
+      # Mail Configuration
       SPRING_MAIL_HOST: smtp.gmail.com
       SPRING_MAIL_PORT: 587
-      SPRING_MAIL_USERNAME: your.email@gmail.com # <--- IMPORTANT: REPLACE WITH YOUR ACTUAL GMAIL/SMTP EMAIL
-      SPRING_MAIL_PASSWORD: your_app_password     # <--- IMPORTANT: REPLACE WITH YOUR GMAIL APP PASSWORD (NOT YOUR REGULAR PASSWORD) OR SMTP PASSWORD
+      SPRING_MAIL_USERNAME: your.email@gmail.com
+      SPRING_MAIL_PASSWORD: your_app_password
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: true
       SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: true
 
-      # --- OTP Module Configuration ---
-      # These will be picked up by Spring Boot and mapped to 'otp.*' properties.
+      # OTP Configuration
       OTP_VALIDITY_MINUTES: 5
       OTP_RESEND_COOLDOWN_SECONDS: 60
 
-      # --- JWT Configuration
+      # JWT Configuration
       JWT_SECRET: SUxvdmVCYW5nbGFkZXNoSXRJc0FCZWF1dGlmdWxsQ291bnRyeQ==
       JWT_EXPIRATION_MS: 3600000
 
-      # --- Spring Profile Activation ---
-      # This tells Spring Boot to load 'application-docker.properties'
+      # Spring Profile
       SPRING_PROFILES_ACTIVE: docker
 
     depends_on:
-      - db # Ensures the 'db' service starts and is healthy before the 'backend' service
+      - db
+      - minio
+    networks:
+      - ecommerce_network
 
-# Define named volumes for data persistence
+# Named volumes for data persistence
 volumes:
-  postgres_data: # This volume will persist your PostgreSQL data, even if containers are removed
+  postgres_data:
+  minio_data:
+
+# Custom network
+networks:
+  ecommerce_network:
+    driver: bridge
