@@ -6,6 +6,7 @@ import com.ecommerce.eshop.ecommerce_backend.payload.request.ProductRequest;
 import com.ecommerce.eshop.ecommerce_backend.payload.response.ProductResponse;
 import com.ecommerce.eshop.ecommerce_backend.service.ProductService;
 import com.ecommerce.eshop.ecommerce_backend.service.MinIOService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,12 @@ public class ProductController {
 
     private final ProductService productService;
     private final MinIOService minIOService;
+    private final ObjectMapper objectMapper;
 
-    public ProductController(ProductService productService, MinIOService minIOService) {
+    public ProductController(ProductService productService, MinIOService minIOService, ObjectMapper objectMapper) {
         this.productService = productService;
         this.minIOService = minIOService;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -37,10 +40,11 @@ public class ProductController {
     @PostMapping(consumes = {"multipart/form-data"})
     //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> createProduct(
-            @Valid @RequestPart("product") ProductRequest productRequest,
+            @RequestPart("product") String productRequestString,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
         try {
+            ProductRequest productRequest = objectMapper.readValue(productRequestString, ProductRequest.class);
             ProductResponse newProduct = productService.createProductWithImages(productRequest, images);
             return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
         } catch (Exception e) {
@@ -76,11 +80,12 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
-            @Valid @RequestPart("product") ProductRequest productRequest,
+            @RequestPart("product") String productRequestString,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
             @RequestParam(value = "keepExistingImages", defaultValue = "false") boolean keepExistingImages
     ) {
         try {
+            ProductRequest productRequest = objectMapper.readValue(productRequestString, ProductRequest.class);
             ProductResponse updatedProduct = productService.updateProductWithImages(
                     id, productRequest, images, keepExistingImages);
             return ResponseEntity.ok(updatedProduct);
