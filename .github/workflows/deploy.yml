@@ -56,6 +56,7 @@ jobs:
           script: |
             cd ~/ecommerce-backend
             echo "DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}" > .env
+            echo "COMPOSE_HTTP_TIMEOUT=300" >> .env
             sudo docker-compose down
             sudo docker-compose pull
             sudo docker-compose up -d
