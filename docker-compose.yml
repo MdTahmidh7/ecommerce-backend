@@ -41,9 +41,7 @@ services:
 
   # Spring Boot Backend
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: ${DOCKER_HUB_USERNAME}/ecommerce-backend:latest
     container_name: ecommerce_backend_app
     restart: always
     ports:
