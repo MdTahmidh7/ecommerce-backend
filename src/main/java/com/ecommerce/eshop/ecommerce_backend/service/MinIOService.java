@@ -86,12 +86,14 @@ public class MinIOService {
     /**
      * Upload file to MinIO and return public URL
      */
-    public String uploadFile(MultipartFile file, String folder) throws Exception {
+    public String uploadFile(MultipartFile file, String folder, String customFileName) throws Exception {
         ensureBucketInitialized();
         validateFile(file);
 
-        String fileName = generateFileName(file.getOriginalFilename());
-        String objectName = folder + "/" + fileName;
+        // Use the provided customFileName directly
+        String fileName = customFileName; // Use the already unique filename
+
+        String objectName = folder + "/" + fileName; // This will now be products/uniqueFileName
 
         try (InputStream inputStream = file.getInputStream()) {
             minioClient.putObject(
@@ -118,7 +120,26 @@ public class MinIOService {
      * Upload product image
      */
     public String uploadProductImage(MultipartFile file, Long productId) throws Exception {
-        return uploadFile(file, "products/" + productId);
+        // Generate a unique filename here.
+        // The productId can be incorporated into the filename if you want,
+        // but the key is to ensure uniqueness for the flat 'products/' folder.
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        }
+
+        // Option 1: Using UUID for maximum uniqueness
+        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
+
+        // Option 2: Incorporate productId and a timestamp (requires sanitization if originalFilename is used)
+        // String uniqueFileName = productId + "_" + System.currentTimeMillis() + "_" +
+        //                         // Sanitize originalFilename if you include it to remove invalid path characters
+        //                         originalFilename.replaceAll("[^a-zA-Z0-9.\\-]", "_");
+        // Ensure this uniqueFileName is safe for file paths.
+
+        // Pass "products" as the folder, and the uniqueFileName will be used by uploadFile
+        return uploadFile(file, "products", uniqueFileName); // Modified to pass uniqueFileName
     }
 
     /**
