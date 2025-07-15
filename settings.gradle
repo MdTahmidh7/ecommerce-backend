@@ -7,4 +7,4 @@ include 'auth-module' // <--- ADD THIS LINE
 include 'email-otp-module'
 // If you have other modules, you'd list them here too, e.g.,
 // include 'product-module'
-// include 'order-module'
+include 'order-module'
