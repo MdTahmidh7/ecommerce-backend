@@ -8,3 +8,4 @@ include 'email-otp-module'
 // If you have other modules, you'd list them here too, e.g.,
 // include 'product-module'
 include 'order-module'
+include 'shipping-module'

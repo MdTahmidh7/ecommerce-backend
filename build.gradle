@@ -46,6 +46,7 @@ dependencies {
 	// --- END ADDED auth-module ---
 	implementation project(':email-otp-module')
 	implementation project(':order-module')
+	implementation project(':shipping-module')
 
 	// --- ADD THESE LINES FOR SPRINGDOC OPENAPI (SWAGGER) ---
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'

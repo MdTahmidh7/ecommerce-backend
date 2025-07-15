@@ -3,6 +3,7 @@ package com.ecommerce.eshop.authmodule.controller;
 import com.ecommerce.eshop.authmodule.dto.JwtResponseDTO;
 import com.ecommerce.eshop.authmodule.dto.LoginRequestDTO;
 import com.ecommerce.eshop.authmodule.dto.RegisterRequestDTO;
+import com.ecommerce.eshop.authmodule.dto.RegistrationResponseDTO;
 import com.ecommerce.eshop.authmodule.entity.User;
 import com.ecommerce.eshop.authmodule.service.AuthService;
 import jakarta.validation.Valid;
@@ -29,16 +30,15 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(
+    public ResponseEntity<RegistrationResponseDTO> registerUser(
             @Valid @RequestBody RegisterRequestDTO registerRequest
     ) { // Changed param type
         try {
             User newUser = authService.registerUser(registerRequest);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body("User registered successfully! User ID: " + newUser.getId());
+            RegistrationResponseDTO response = new RegistrationResponseDTO(newUser.getId(), "User registered successfully!");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(new RegistrationResponseDTO(null, e.getMessage()));
         }
     }
 }

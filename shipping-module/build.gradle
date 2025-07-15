@@ -1,4 +1,4 @@
-// order-module/build.gradle
+// shipping-module/build.gradle
 
 plugins {
 	id 'java'
@@ -7,14 +7,14 @@ plugins {
 	id 'maven-publish'
 }
 
-group = 'com.ecommerce.eshop.ordermodule'
+group = 'com.ecommerce.eshop.shippingmodule'
 version = '0.0.1-SNAPSHOT'
 
 publishing {
 	publications {
 		maven(MavenPublication) {
 			groupId = project.group
-			artifactId = 'order-module'
+			artifactId = 'shipping-module'
 			version = project.version
 
 			from components.java
@@ -39,20 +39,12 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-amqp'
-	implementation 'org.springframework.boot:spring-boot-starter-json' // Added for JSON message conversion
+	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	testImplementation 'com.h2database:h2'
-	implementation project(':shipping-module')
+	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 }
 
 tasks.named('test') {

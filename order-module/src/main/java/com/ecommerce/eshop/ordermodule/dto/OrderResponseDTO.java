@@ -4,6 +4,7 @@ import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @Data
@@ -14,5 +15,6 @@ public class OrderResponseDTO {
     private BigDecimal totalPrice;
     private String shippingAddress;
     private OrderStatus status;
+    private Instant creationDate;
     private List<OrderItemDTO> orderItems;
 }

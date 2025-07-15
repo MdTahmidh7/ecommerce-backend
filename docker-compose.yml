@@ -39,9 +39,25 @@ services:
       timeout: 20s
       retries: 3
 
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: ecommerce_rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"  # AMQP port
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - ecommerce_network
+
   # Spring Boot Backend
   backend:
-    image: ${DOCKER_HUB_USERNAME}/ecommerce-backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: ecommerce_backend_app
     restart: always
     ports:
@@ -80,6 +96,7 @@ services:
     depends_on:
       - db
       - minio
+      - rabbitmq
     networks:
       - ecommerce_network
 
