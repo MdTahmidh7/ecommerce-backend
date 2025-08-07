@@ -91,9 +91,9 @@ public class MinIOService {
         validateFile(file);
 
         // Use the provided customFileName directly
-        String fileName = customFileName; // Use the already unique filename
+        // Use the already unique filename
 
-        String objectName = folder + "/" + fileName; // This will now be products/uniqueFileName
+        String objectName = folder + "/" + customFileName; // This will now be products/uniqueFileName
 
         try (InputStream inputStream = file.getInputStream()) {
             minioClient.putObject(
@@ -106,9 +106,9 @@ public class MinIOService {
             );
 
             // Return public URL
-            String publicUrl = endpoint + "/" + bucketName + "/" + objectName;
-            log.info("File uploaded successfully: {}", publicUrl);
-            return publicUrl;
+            //String publicUrl = endpoint + "/" + bucketName + "/" + objectName;
+            log.info("File uploaded successfully: {}", objectName);
+            return objectName;
 
         } catch (Exception e) {
             log.error("Error uploading file: {}", e.getMessage(), e);

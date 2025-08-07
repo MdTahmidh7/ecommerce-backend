@@ -79,20 +79,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/categories").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
 
-                        // --- TEMPORARY: Allow authenticated users to create categories for testing ---
-                        .requestMatchers(HttpMethod.POST, "/api/categories").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/categories/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/categories/**").authenticated()
-
-                        // --- TEMPORARY: Allow authenticated users to create products for testing ---
-                        .requestMatchers(HttpMethod.POST, "/api/products").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/products/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/products/*/images").authenticated()
-
-                        // --- ADD THESE LINES FOR OTP MODULE ENDPOINTS ---
-                        .requestMatchers(HttpMethod.POST, "/api/otp/send").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/otp/verify").permitAll()
+                        .requestMatchers("/api/orders/**").authenticated()
                         // --- END ADDITION ---
 
                         .anyRequest().authenticated()

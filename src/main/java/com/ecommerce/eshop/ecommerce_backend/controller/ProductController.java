@@ -8,10 +8,12 @@ import com.ecommerce.eshop.ecommerce_backend.service.ProductService;
 import com.ecommerce.eshop.ecommerce_backend.service.MinIOService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -37,20 +40,21 @@ public class ProductController {
      * Creates a new product with optional images
      * Accessible by ADMIN.
      */
-    @PostMapping(consumes = {"multipart/form-data"})
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponse> createProduct(
-            @RequestPart("product") String productRequestString,
+            @RequestPart("product") @Valid ProductRequest productRequest,
             @RequestPart(value = "images", required = false) List<MultipartFile> images
     ) {
         try {
-            ProductRequest productRequest = objectMapper.readValue(productRequestString, ProductRequest.class);
             ProductResponse newProduct = productService.createProductWithImages(productRequest, images);
             return new ResponseEntity<>(newProduct, HttpStatus.CREATED);
         } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Error creating product: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
+
 
     /**
      * Retrieves all non-deleted products with pagination.

@@ -1,5 +1,6 @@
 package com.ecommerce.eshop.ordermodule.controller;
 
+import com.ecommerce.eshop.authmodule.entity.User;
 import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
@@ -7,6 +8,7 @@ import com.ecommerce.eshop.ordermodule.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -21,9 +23,16 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
-        // TODO: Get user ID from security context
-        Long userId = 1L;
-        return ResponseEntity.ok(orderService.createOrder(orderRequestDTO, userId));
+
+        User user = (User) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (user == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(orderService.createOrder(orderRequestDTO, user.getId()));
     }
 
     @PutMapping("/{orderId}/status")
@@ -35,12 +44,39 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrders(
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersForUser(
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        List<OrderResponseDTO> orders = orderService.getAllOrders(status, startDate, endDate);
+
+        User user = (User) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (user == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<OrderResponseDTO> orders = orderService.getAllOrders(
+                status,
+                startDate,
+                endDate,
+                user.getId()
+        );
+
+        return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/admin")
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersForAdmin(
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) Long categoryId
+    ) {
+        List<OrderResponseDTO> orders = orderService.getAllOrdersForAdmin(status, startDate, endDate, categoryId);
         return ResponseEntity.ok(orders);
     }
 }

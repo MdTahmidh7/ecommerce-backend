@@ -1,5 +1,6 @@
 package com.ecommerce.eshop.ordermodule.service;
 
+
 import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
 import com.ecommerce.eshop.ordermodule.entity.Order;
@@ -9,7 +10,10 @@ import com.ecommerce.eshop.ordermodule.repository.OrderRepository;
 import com.ecommerce.eshop.shippingmodule.dto.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -26,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final RestTemplate restTemplate;
 
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO, Long userId) {
@@ -72,26 +77,30 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponseDTO> getAllOrders(OrderStatus status, LocalDate startDate, LocalDate endDate) {
+    public List<OrderResponseDTO> getAllOrders(OrderStatus status, LocalDate startDate, LocalDate endDate, Long userId) {
 
-        List<Order> orders;
+        List<Order> orders = orderRepository.findByUserId(userId);
 
-        if (status != null && startDate != null && endDate != null) {
-            orders = orderRepository.findByStatusAndCreationDateBetween(
-                    status,
-                    startDate.atStartOfDay(ZoneOffset.UTC).toInstant(),
-                    endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant()
-            );
-        } else if (status != null) {
-            orders = orderRepository.findByStatus(status);
-        } else if (startDate != null && endDate != null) {
-            orders = orderRepository.findByCreationDateBetween(
-                    startDate.atStartOfDay(ZoneOffset.UTC).toInstant(),
-                    endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant()
-            );
-        } else {
-            orders = orderRepository.findAll();
-        }
+        return orders
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<OrderResponseDTO> getAllOrdersForAdmin(
+            OrderStatus status,
+            LocalDate startDate,
+            LocalDate endDate,
+            Long categoryId
+    ) {
+
+        List<Order> orders = orderRepository.findOrdersByFilters(
+                status != null ? status.name() : null,
+                startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null,
+                endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null,
+                categoryId
+        );
 
         return orders
                 .stream()

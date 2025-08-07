@@ -53,6 +53,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'com.h2database:h2'
 	implementation project(':shipping-module')
+	implementation project(':auth-module')
 }
 
 tasks.named('test') {
