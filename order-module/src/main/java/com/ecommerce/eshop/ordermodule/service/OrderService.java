@@ -4,6 +4,9 @@ import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -15,5 +18,11 @@ public interface OrderService {
 
     List<OrderResponseDTO> getAllOrders(OrderStatus status, LocalDate startDate, LocalDate endDate, Long userId);
 
-    List<OrderResponseDTO> getAllOrdersForAdmin(OrderStatus status, LocalDate startDate, LocalDate endDate, Long categoryId);
+    Page<OrderResponseDTO> getAllOrdersForAdmin(
+            OrderStatus status,
+            LocalDate startDate,
+            LocalDate endDate,
+            Long categoryId,
+            Pageable pageable
+    );
 }

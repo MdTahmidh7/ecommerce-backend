@@ -2,6 +2,8 @@ package com.ecommerce.eshop.ordermodule.repository;
 
 import com.ecommerce.eshop.ordermodule.entity.Order;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -28,10 +30,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
               AND (:categoryId IS NULL OR oi.product_id IN (SELECT p.id FROM products p WHERE p.category_id = :categoryId))
             """,
             nativeQuery = true)
-    List<Order> findOrdersByFilters(
+    Page<Order> findOrdersByFilters(
             @Param("status") String status,
             @Param("startDate") Instant startDate,
             @Param("endDate") Instant endDate,
-            @Param("categoryId") Long categoryId
+            @Param("categoryId") Long categoryId,
+            Pageable pageable
     );
 }

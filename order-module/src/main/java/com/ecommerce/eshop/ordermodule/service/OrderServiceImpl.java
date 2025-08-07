@@ -10,10 +10,10 @@ import com.ecommerce.eshop.ordermodule.repository.OrderRepository;
 import com.ecommerce.eshop.shippingmodule.dto.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -30,7 +30,6 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final RabbitTemplate rabbitTemplate;
-    private final RestTemplate restTemplate;
 
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO, Long userId) {
@@ -88,24 +87,29 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponseDTO> getAllOrdersForAdmin(
+    public Page<OrderResponseDTO> getAllOrdersForAdmin(
             OrderStatus status,
             LocalDate startDate,
             LocalDate endDate,
-            Long categoryId
+            Long categoryId,
+            Pageable pageable
     ) {
 
-        List<Order> orders = orderRepository.findOrdersByFilters(
+        Page<Order> orders = orderRepository.findOrdersByFilters(
                 status != null ? status.name() : null,
                 startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null,
                 endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null,
-                categoryId
+                categoryId,
+                pageable
         );
 
-        return orders
+        List<OrderResponseDTO> orderDtos = orders
+                .getContent()
                 .stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(orderDtos, pageable, orders.getTotalElements());
     }
 
     private OrderCreatedEvent toOrderCreatedEvent(Order order) {
