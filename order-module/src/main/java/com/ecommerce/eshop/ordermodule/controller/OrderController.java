@@ -24,7 +24,9 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
+    public ResponseEntity<OrderResponseDTO> createOrder(
+            @RequestBody OrderRequestDTO orderRequestDTO
+    ) {
 
         User user = (User) SecurityContextHolder
                 .getContext()

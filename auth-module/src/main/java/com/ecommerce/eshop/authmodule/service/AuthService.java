@@ -70,6 +70,7 @@ public class AuthService {
     }
 
     public JwtResponseDTO authenticateUser(LoginRequestDTO request) { // Changed param type and return type
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getPhoneNumber(), request.getPassword()));
 

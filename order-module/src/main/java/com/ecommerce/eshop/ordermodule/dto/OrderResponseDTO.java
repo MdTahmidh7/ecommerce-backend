@@ -12,9 +12,13 @@ public class OrderResponseDTO {
 
     private Long id;
     private Long userId;
+    private String userName;
     private BigDecimal totalPrice;
-    private String shippingAddress;
+    private Long upazilaId;
     private OrderStatus status;
     private Instant creationDate;
+    private Long productId;
+    private String productName;
     private List<OrderItemDTO> orderItems;
+
 }

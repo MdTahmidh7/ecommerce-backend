@@ -1,6 +1,8 @@
 package com.ecommerce.eshop.ordermodule.service;
 
 
+import com.ecommerce.eshop.authmodule.entity.User;
+import com.ecommerce.eshop.authmodule.repository.UserRepository;
 import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
 import com.ecommerce.eshop.ordermodule.entity.Order;
@@ -9,7 +11,6 @@ import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
 import com.ecommerce.eshop.ordermodule.repository.OrderRepository;
 import com.ecommerce.eshop.shippingmodule.dto.OrderCreatedEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,14 +31,14 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final RabbitTemplate rabbitTemplate;
+    private final UserRepository userRepository;
 
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO, Long userId) {
 
         Order order = new Order();
         order.setUserId(userId);
-        order.setShippingAddress(orderRequestDTO.getShippingAddress());
+        order.setUpazilaId(orderRequestDTO.getUpazilaId());
         order.setStatus(OrderStatus.PENDING);
         order.setCreationDate(Instant.now());
 
@@ -56,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        rabbitTemplate.convertAndSend("q.order.created", toOrderCreatedEvent(savedOrder));
+       // rabbitTemplate.convertAndSend("q.order.created", toOrderCreatedEvent(savedOrder));
 
         return toDto(savedOrder);
     }
@@ -103,13 +105,36 @@ public class OrderServiceImpl implements OrderService {
                 pageable
         );
 
-        List<OrderResponseDTO> orderDtos = orders
+        List<Long> userIdList = orders
                 .getContent()
                 .stream()
-                .map(this::toDto)
+                .map(Order::getUserId)
+                .distinct()
+                .toList();
+
+        List<User> users = userRepository.findAllById(userIdList);
+
+        Map<Long, String> userIdToNameMap = users
+                .stream()
+                .collect(Collectors.toMap(
+                        User::getId,
+                        user -> user.getFirstName() + " " + user.getLastName()
+                ));
+        //add userName from userIdToNameMap
+
+
+        List<OrderResponseDTO> orderDtoList = orders
+                .getContent()
+                .stream()
+                .map(order -> {
+                    OrderResponseDTO dto = this.toDto(order);
+                    String userName = userIdToNameMap.get(dto.getUserId());
+                    dto.setUserName(userName);
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(orderDtos, pageable, orders.getTotalElements());
+        return new PageImpl<>(orderDtoList, pageable, orders.getTotalElements());
     }
 
     private OrderCreatedEvent toOrderCreatedEvent(Order order) {
@@ -117,9 +142,9 @@ public class OrderServiceImpl implements OrderService {
                 order.getId(),
                 order.getUserId(),
                 order.getTotalPrice(),
-                order.getShippingAddress(),
-                order.getOrderItems().stream().map(orderItem ->
-                        new com.ecommerce.eshop.shippingmodule.dto.OrderItemDTO(
+                order.getUpazilaId(),
+                order.getOrderItems().stream().map(
+                        orderItem -> new com.ecommerce.eshop.shippingmodule.dto.OrderItemDTO(
                                 orderItem.getProductId(),
                                 orderItem.getQuantity(),
                                 orderItem.getPrice()
@@ -133,7 +158,7 @@ public class OrderServiceImpl implements OrderService {
         dto.setId(order.getId());
         dto.setUserId(order.getUserId());
         dto.setTotalPrice(order.getTotalPrice());
-        dto.setShippingAddress(order.getShippingAddress());
+        dto.setUpazilaId(order.getUpazilaId());
         dto.setStatus(order.getStatus());
         dto.setCreationDate(order.getCreationDate());
         dto.setOrderItems(order.getOrderItems().stream().map(orderItem -> {

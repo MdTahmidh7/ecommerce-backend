@@ -15,6 +15,6 @@ public class OrderCreatedEvent {
     private Long orderId;
     private Long userId;
     private BigDecimal totalPrice;
-    private String shippingAddress;
+    private Long upazilaId;
     private List<OrderItemDTO> orderItems;
 }

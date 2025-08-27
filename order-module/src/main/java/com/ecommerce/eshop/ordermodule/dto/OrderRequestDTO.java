@@ -7,6 +7,7 @@ import java.util.List;
 @Data
 public class OrderRequestDTO {
 
-    private String shippingAddress;
+    private Long upazilaId;
+    private Long userId;
     private List<OrderItemDTO> orderItems;
 }

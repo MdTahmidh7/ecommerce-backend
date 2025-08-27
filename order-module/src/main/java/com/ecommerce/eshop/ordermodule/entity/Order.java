@@ -26,7 +26,7 @@ public class Order {
 
     private BigDecimal totalPrice;
 
-    private String shippingAddress;
+    private Long upazilaId;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
