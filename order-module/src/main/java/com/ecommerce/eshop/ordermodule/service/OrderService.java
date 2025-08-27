@@ -27,5 +27,9 @@ public interface OrderService {
             Pageable pageable
     );
 
-    List<OrderSummaryDTO> getAllOrderSummaries();
+    List<OrderSummaryDTO> getAllOrderSummaries(
+            OrderStatus orderStatus,
+            String from,
+            String to
+    );
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
@@ -53,8 +54,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                 FROM orders o
                          JOIN users u ON o.user_id = u.id
                          LEFT JOIN order_items oi ON oi.order_id = o.id
+                WHERE
+                    :status IS NULL OR o.status = :status
+                    AND (:from is null OR o.creation_date >= :from)
+                    AND (:to is null OR o.creation_date <= :to)
                 ORDER BY o.creation_date DESC
             """, nativeQuery = true)
-    List<Object[]> findAllOrderSummariesNative();
+    List<Object[]> findAllOrderSummariesNative(
+            OrderStatus status,
+            Timestamp from,
+            Timestamp to
+    );
 
 }

@@ -174,9 +174,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // Lightweight method for list view
-    public List<OrderSummaryDTO> getAllOrderSummaries() {
+    public List<OrderSummaryDTO> getAllOrderSummaries(
+            OrderStatus orderStatus,
+            String from,
+            String to
+    ) {
 
-        List<Object[]> results = orderRepository.findAllOrderSummariesNative();
+        Timestamp fromTs = Timestamp.valueOf(from + " 00:00:00");
+        Timestamp toTs = Timestamp.valueOf(to + " 23:59:59");
+
+        List<Object[]> results = orderRepository.findAllOrderSummariesNative(
+                orderStatus,
+                fromTs,
+                toTs
+        );
 
         return results.stream()
                 .map(row -> {
