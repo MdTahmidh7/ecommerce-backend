@@ -2,6 +2,7 @@ package com.ecommerce.eshop.ordermodule.service;
 
 import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
+import com.ecommerce.eshop.ordermodule.dto.OrderSummaryDTO;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
 
 import org.springframework.data.domain.Page;
@@ -25,4 +26,6 @@ public interface OrderService {
             Long categoryId,
             Pageable pageable
     );
+
+    List<OrderSummaryDTO> getAllOrderSummaries();
 }

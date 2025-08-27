@@ -5,6 +5,7 @@ import com.ecommerce.eshop.authmodule.entity.User;
 import com.ecommerce.eshop.authmodule.repository.UserRepository;
 import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
+import com.ecommerce.eshop.ordermodule.dto.OrderSummaryDTO;
 import com.ecommerce.eshop.ordermodule.entity.Order;
 import com.ecommerce.eshop.ordermodule.entity.OrderItem;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -169,5 +171,50 @@ public class OrderServiceImpl implements OrderService {
             return orderItemDto;
         }).collect(Collectors.toList()));
         return dto;
+    }
+
+    // Lightweight method for list view
+    public List<OrderSummaryDTO> getAllOrderSummaries() {
+        List<Object[]> results = orderRepository.findAllOrderSummariesNative();
+
+        return results.stream()
+                .map(row -> {
+                    Long orderId = ((Number) row[0]).longValue();
+                    String customerName = (String) row[1];
+                    String customerPhone = (String) row[2];
+                    BigDecimal totalPrice = (BigDecimal) row[3];
+                    OrderStatus status = OrderStatus.valueOf((String) row[4]);
+
+                    // Handle Instant/Timestamp
+                    Instant creationDate;
+                    Object creationVal = row[5];
+                    if (creationVal instanceof Timestamp ts) {
+                        creationDate = ts.toInstant();
+                    } else if (creationVal instanceof Instant inst) {
+                        creationDate = inst;
+                    } else {
+                        throw new IllegalStateException("Unexpected type for creationDate: " + creationVal);
+                    }
+
+                    Integer totalItems = ((Number) row[6]).intValue();
+
+                    // careful: product_id is numeric!
+                    String primaryProductName = row[7] != null ? String.valueOf(row[7]) : null;
+
+                    String itemsSummary = (String) row[8];
+
+                    return new OrderSummaryDTO(
+                            orderId,
+                            customerName,
+                            customerPhone,
+                            totalPrice,
+                            status,
+                            creationDate,
+                            totalItems,
+                            primaryProductName,
+                            itemsSummary
+                    );
+                })
+                .toList();
     }
 }

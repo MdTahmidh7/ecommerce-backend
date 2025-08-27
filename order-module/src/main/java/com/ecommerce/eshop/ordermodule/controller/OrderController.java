@@ -3,6 +3,7 @@ package com.ecommerce.eshop.ordermodule.controller;
 import com.ecommerce.eshop.authmodule.entity.User;
 import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
+import com.ecommerce.eshop.ordermodule.dto.OrderSummaryDTO;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
 import com.ecommerce.eshop.ordermodule.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -93,5 +94,12 @@ public class OrderController {
                 pageable
         );
         return ResponseEntity.ok(orders);
+    }
+
+    // Returns lightweight summaries
+    @GetMapping("/all")
+    public ResponseEntity<List<OrderSummaryDTO>> getAllOrders() {
+
+        return ResponseEntity.ok(orderService.getAllOrderSummaries());
     }
 }
