@@ -42,42 +42,17 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Lightweight query for list view
     @Query(value = """
-                SELECT o.id,
-                       CONCAT(u.first_name, ' ', u.last_name) AS customerName,
-                       u.phone_number,
-                       o.total_price,
-                       o.status,
-                       cast(o.creation_date as timestamp) as creation_date,
-                       COUNT(oi.id) AS itemCount,
-                       (SELECT oi2.product_id
-                          FROM order_items oi2
-                         WHERE oi2.order_id = o.id
-                         ORDER BY oi2.id
-                         LIMIT 1) AS firstProduct,
-                       CASE
-                           WHEN COUNT(oi.id) > 1
-                               THEN CONCAT(
-                                   CAST((SELECT oi2.product_id
-                                           FROM order_items oi2
-                                          WHERE oi2.order_id = o.id
-                                          ORDER BY oi2.id
-                                          LIMIT 1) AS TEXT),
-                                   ' + ',
-                                   (COUNT(oi.id) - 1),
-                                   ' more'
-                               )
-                           ELSE CAST((
-                               SELECT oi2.product_id
-                               FROM order_items oi2
-                               WHERE oi2.order_id = o.id
-                               ORDER BY oi2.id
-                               LIMIT 1
-                           ) AS TEXT)
-                       END AS productSummary
+                SELECT o.id                                   as order_id,
+                       CONCAT(u.first_name, ' ', u.last_name) AS customer_name,
+                       u.phone_number                         as customer_phone_number,
+                       o.total_price                          as total_price,
+                       o.status                               as status,
+                       cast(o.creation_date as timestamp)     as creation_date,
+                       oi.quantity                            AS item_count,
+                       oi.product_id                          as product_id
                 FROM orders o
-                JOIN users u ON o.user_id = u.id
-                LEFT JOIN order_items oi ON oi.order_id = o.id
-                GROUP BY o.id, u.first_name, u.last_name, u.phone_number, o.total_price, o.status, o.creation_date
+                         JOIN users u ON o.user_id = u.id
+                         LEFT JOIN order_items oi ON oi.order_id = o.id
                 ORDER BY o.creation_date DESC
             """, nativeQuery = true)
     List<Object[]> findAllOrderSummariesNative();

@@ -175,6 +175,7 @@ public class OrderServiceImpl implements OrderService {
 
     // Lightweight method for list view
     public List<OrderSummaryDTO> getAllOrderSummaries() {
+
         List<Object[]> results = orderRepository.findAllOrderSummariesNative();
 
         return results.stream()
@@ -197,11 +198,7 @@ public class OrderServiceImpl implements OrderService {
                     }
 
                     Integer totalItems = ((Number) row[6]).intValue();
-
-                    // careful: product_id is numeric!
-                    String primaryProductName = row[7] != null ? String.valueOf(row[7]) : null;
-
-                    String itemsSummary = (String) row[8];
+                    Long productId = row[7] != null ? (Long)row[7] : null;
 
                     return new OrderSummaryDTO(
                             orderId,
@@ -211,8 +208,7 @@ public class OrderServiceImpl implements OrderService {
                             status,
                             creationDate,
                             totalItems,
-                            primaryProductName,
-                            itemsSummary
+                            productId
                     );
                 })
                 .toList();

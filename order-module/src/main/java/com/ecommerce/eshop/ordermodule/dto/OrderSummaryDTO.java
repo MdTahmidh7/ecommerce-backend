@@ -23,6 +23,5 @@ public class OrderSummaryDTO {
 
     // Just basic item info for the list view
     private Integer totalItems;
-    private String primaryProductName; // First/main product name
-    private String itemsSummary; // e.g., "Product A, Product B + 2 more"
+    private Long productId; // First/main product name
 }
