@@ -55,15 +55,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                          JOIN users u ON o.user_id = u.id
                          LEFT JOIN order_items oi ON oi.order_id = o.id
                 WHERE
-                    :status IS NULL OR o.status = :status
-                    AND (:from is null OR o.creation_date >= :from)
-                    AND (:to is null OR o.creation_date <= :to)
-                ORDER BY o.creation_date DESC
+                    o.status = COALESCE(:status, o.status)
+                    AND o.creation_date >= COALESCE(:from, o.creation_date)
+                    AND o.creation_date <= COALESCE(:to, o.creation_date)
+                ORDER BY o.creation_date DESC;
             """, nativeQuery = true)
     List<Object[]> findAllOrderSummariesNative(
-            OrderStatus status,
-            Timestamp from,
-            Timestamp to
+            @Param("status") String status,
+            @Param("from") Timestamp from,
+            @Param("to") Timestamp to
     );
 
 }

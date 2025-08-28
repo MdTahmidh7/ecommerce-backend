@@ -100,13 +100,13 @@ public class OrderController {
     // Returns lightweight summaries
     @GetMapping("/all")
     public ResponseEntity<List<OrderSummaryDTO>> getAllOrders(
-            @Param("orderStatus") OrderStatus orderStatus,
+            @Param("status") OrderStatus status,
             @Param("from") String from,
             @Param("to") String to
     ) {
 
         return ResponseEntity.ok(orderService.getAllOrderSummaries(
-                orderStatus,
+                status,
                 from,
                 to
         ));

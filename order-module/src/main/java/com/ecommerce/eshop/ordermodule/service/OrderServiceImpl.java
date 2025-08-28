@@ -183,8 +183,10 @@ public class OrderServiceImpl implements OrderService {
         Timestamp fromTs = Timestamp.valueOf(from + " 00:00:00");
         Timestamp toTs = Timestamp.valueOf(to + " 23:59:59");
 
+        String orderStatusStr = orderStatus != null ? orderStatus.name() : null;
+
         List<Object[]> results = orderRepository.findAllOrderSummariesNative(
-                orderStatus,
+                orderStatusStr,
                 fromTs,
                 toTs
         );
