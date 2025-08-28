@@ -64,21 +64,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus newStatus) {
+    public OrderDetailsDTO updateOrderStatus(Long orderId, OrderStatus newStatus) {
 
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
+
         if (optionalOrder.isEmpty()) {
             throw new RuntimeException("Order not found with ID: " + orderId);
         }
 
         Order order = optionalOrder.get();
         order.setStatus(newStatus);
-        Order updatedOrder = orderRepository.save(order);
-        return toDto(updatedOrder);
+        orderRepository.save(order);
+
+        return getOrderDetailsByOrderId(orderId);
     }
 
     @Override
-    public List<OrderResponseDTO> getAllOrders(OrderStatus status, LocalDate startDate, LocalDate endDate, Long userId) {
+    public List<OrderResponseDTO> getAllOrders(
+            OrderStatus status,
+            LocalDate startDate,
+            LocalDate endDate,
+            Long userId
+    ) {
 
         List<Order> orders = orderRepository.findByUserId(userId);
 
@@ -138,6 +145,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private OrderCreatedEvent toOrderCreatedEvent(Order order) {
+
         return new OrderCreatedEvent(
                 order.getId(),
                 order.getUserId(),
@@ -232,6 +240,10 @@ public class OrderServiceImpl implements OrderService {
 
         Object[] row = (Object[]) orderRepository.findOrderDetailsByOrderId(orderId);
 
+        if (row == null) {
+            throw new RuntimeException("Order not found with ID: " + orderId);
+        }
+
         OrderSummaryDTO orderSummary = new OrderSummaryDTO(
                 ((Number) row[0]).longValue(),
                 (String) row[1],
@@ -248,6 +260,9 @@ public class OrderServiceImpl implements OrderService {
         Object[] orderLocationObject = (Object[]) orderRepository
                 .getOrderLocationByUpazilaId(orderSummary.getUpazilaId());
 
+        Object[] productDetails = (Object[]) orderRepository
+                .getProductDetailsByProductId(orderSummary.getProductId());
+
         OrderLocationDTO orderLocationDTO = new OrderLocationDTO(
                 ((Number) orderLocationObject[6]).longValue(),
                 (String) orderLocationObject[0],
@@ -260,8 +275,8 @@ public class OrderServiceImpl implements OrderService {
                 (String) orderLocationObject[5]
         );
 
-        String productName = "";
-        String productImage = "";
+        String productName = productDetails != null ? (String) productDetails[1] : "N/A";
+        String productImage = productDetails != null ? (String) productDetails[2] : "N/A";
 
         //prepare OrderDetailsDTO
         OrderDetailsDTO orderDetailsDTO = new OrderDetailsDTO();
@@ -281,7 +296,7 @@ public class OrderServiceImpl implements OrderService {
         orderDetailsDTO.setUpazilaName(orderLocationDTO.getUpazilaName());
         orderDetailsDTO.setDistrictName(orderLocationDTO.getDistrictName());
         orderDetailsDTO.setDivisionName(orderLocationDTO.getDivisionName());
-        orderDetailsDTO.setAddress("N/A");
+        orderDetailsDTO.setAddress(" ");
 
         return orderDetailsDTO;
     }

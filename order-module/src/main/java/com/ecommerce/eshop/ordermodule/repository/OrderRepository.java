@@ -106,4 +106,18 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     );
 
 
+    @Query(value = """
+            select p.id          as productId,
+                   p.name        as productName,
+                   p.image_url   as productImageUrl,
+                   p.price       as productPrice,
+                   p.stock_quantity as productStockQuantity
+            from products p
+            where p.id = :productId
+            """, nativeQuery = true)
+    Object getProductDetailsByProductId(
+            @Param("productId") Long productId
+    );
+
+
 }

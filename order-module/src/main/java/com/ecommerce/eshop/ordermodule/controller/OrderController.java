@@ -42,13 +42,13 @@ public class OrderController {
         return ResponseEntity.ok(orderService.createOrder(orderRequestDTO, user.getId()));
     }
 
-    @PutMapping("/{orderId}/status")
-    public ResponseEntity<OrderResponseDTO> updateOrderStatus(
-            @PathVariable Long orderId,
-            @RequestParam OrderStatus newStatus
-    ) {
-        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, newStatus));
-    }
+//    @PutMapping("/{orderId}/status")
+//    public ResponseEntity<OrderDetailsDTO> updateOrderStatus(
+//            @PathVariable Long orderId,
+//            @RequestParam OrderStatus newStatus
+//    ) {
+//        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, newStatus));
+//    }
 
     @GetMapping
     public ResponseEntity<List<OrderResponseDTO>> getAllOrdersForUser(
@@ -120,6 +120,17 @@ public class OrderController {
     ){
         return ResponseEntity.ok(
                 orderService.getOrderDetailsByOrderId(orderId)
+        );
+    }
+
+    //API to update order status
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<OrderDetailsDTO> changeOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam OrderStatus status
+    ){
+        return ResponseEntity.ok(
+                orderService.updateOrderStatus(orderId, status)
         );
     }
 

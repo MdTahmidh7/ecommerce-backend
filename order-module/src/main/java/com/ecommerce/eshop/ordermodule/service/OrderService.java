@@ -16,7 +16,10 @@ public interface OrderService {
 
     OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO, Long userId);
 
-    OrderResponseDTO updateOrderStatus(Long orderId, OrderStatus newStatus);
+    OrderDetailsDTO updateOrderStatus(
+            Long orderId,
+            OrderStatus newStatus
+    );
 
     List<OrderResponseDTO> getAllOrders(OrderStatus status, LocalDate startDate, LocalDate endDate, Long userId);
 

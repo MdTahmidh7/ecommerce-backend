@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    @Bean
-    public Queue orderCreatedQueue() {
-        return QueueBuilder.durable("q.order.created").build();
-    }
+//    @Bean
+//    public Queue orderCreatedQueue() {
+//        return QueueBuilder.durable("q.order.created").build();
+//    }
 }
