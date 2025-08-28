@@ -11,9 +11,9 @@ import java.time.Instant;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class OrderSummaryDTO {
+@NoArgsConstructor
+public class OrderDetailsDTO {
 
     private Long orderId;
     private String customerName;
@@ -25,5 +25,11 @@ public class OrderSummaryDTO {
     private Integer productCount;
     private BigDecimal totalPrice;
     private Instant creationDate;
+    private String productName;
+    private String imageUrl;
+    private String upazilaName;
+    private String divisionName;
+    private String districtName;
+    private String address;
 
 }

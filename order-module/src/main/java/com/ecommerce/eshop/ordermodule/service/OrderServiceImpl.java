@@ -3,9 +3,7 @@ package com.ecommerce.eshop.ordermodule.service;
 
 import com.ecommerce.eshop.authmodule.entity.User;
 import com.ecommerce.eshop.authmodule.repository.UserRepository;
-import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
-import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
-import com.ecommerce.eshop.ordermodule.dto.OrderSummaryDTO;
+import com.ecommerce.eshop.ordermodule.dto.*;
 import com.ecommerce.eshop.ordermodule.entity.Order;
 import com.ecommerce.eshop.ordermodule.entity.OrderItem;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
@@ -217,13 +215,74 @@ public class OrderServiceImpl implements OrderService {
                             orderId,
                             customerName,
                             customerPhone,
-                            totalPrice,
+                            null,
                             status,
-                            creationDate,
+                            productId,
+                            null,
                             totalItems,
-                            productId
+                            totalPrice,
+                            creationDate
                     );
                 })
                 .toList();
+    }
+
+    @Override
+    public OrderDetailsDTO getOrderDetailsByOrderId(Long orderId) {
+
+        Object[] row = (Object[]) orderRepository.findOrderDetailsByOrderId(orderId);
+
+        OrderSummaryDTO orderSummary = new OrderSummaryDTO(
+                ((Number) row[0]).longValue(),
+                (String) row[1],
+                (String) row[2],
+                ((Number) row[3]).longValue(),
+                OrderStatus.valueOf((String) row[4]),
+                ((Number) row[5]).longValue(),
+                ((Number) row[6]).doubleValue(),
+                ((Number) row[7]).intValue(),
+                (BigDecimal) row[8],
+                ((Timestamp) row[9]).toInstant()
+        );
+
+        Object[] orderLocationObject = (Object[]) orderRepository
+                .getOrderLocationByUpazilaId(orderSummary.getUpazilaId());
+
+        OrderLocationDTO orderLocationDTO = new OrderLocationDTO(
+                ((Number) orderLocationObject[6]).longValue(),
+                (String) orderLocationObject[0],
+                (String) orderLocationObject[3],
+                ((Number) orderLocationObject[7]).longValue(),
+                (String) orderLocationObject[1],
+                (String) orderLocationObject[4],
+                ((Number) orderLocationObject[8]).longValue(),
+                (String) orderLocationObject[2],
+                (String) orderLocationObject[5]
+        );
+
+        String productName = "";
+        String productImage = "";
+
+        //prepare OrderDetailsDTO
+        OrderDetailsDTO orderDetailsDTO = new OrderDetailsDTO();
+
+        orderDetailsDTO.setOrderId(orderSummary.getOrderId());
+        orderDetailsDTO.setCustomerName(orderSummary.getCustomerName());
+        orderDetailsDTO.setCustomerPhone(orderSummary.getCustomerPhone());
+        orderDetailsDTO.setUpazilaId(orderSummary.getUpazilaId());
+        orderDetailsDTO.setStatus(orderSummary.getStatus());
+        orderDetailsDTO.setProductId(orderSummary.getProductId());
+        orderDetailsDTO.setProductPrice(orderSummary.getProductPrice());
+        orderDetailsDTO.setProductCount(orderSummary.getProductCount());
+        orderDetailsDTO.setTotalPrice(orderSummary.getTotalPrice());
+        orderDetailsDTO.setCreationDate(orderSummary.getCreationDate());
+        orderDetailsDTO.setProductName(productName);
+        orderDetailsDTO.setImageUrl(productImage);
+        orderDetailsDTO.setUpazilaName(orderLocationDTO.getUpazilaName());
+        orderDetailsDTO.setDistrictName(orderLocationDTO.getDistrictName());
+        orderDetailsDTO.setDivisionName(orderLocationDTO.getDivisionName());
+        orderDetailsDTO.setAddress("N/A");
+
+        return orderDetailsDTO;
     }
 }

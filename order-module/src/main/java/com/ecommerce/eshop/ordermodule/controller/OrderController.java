@@ -1,6 +1,7 @@
 package com.ecommerce.eshop.ordermodule.controller;
 
 import com.ecommerce.eshop.authmodule.entity.User;
+import com.ecommerce.eshop.ordermodule.dto.OrderDetailsDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderSummaryDTO;
@@ -111,4 +112,15 @@ public class OrderController {
                 to
         ));
     }
+
+    //create API for a specific order details
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderDetailsDTO> getOrderDetailsByOrderId(
+            @PathVariable Long orderId
+    ){
+        return ResponseEntity.ok(
+                orderService.getOrderDetailsByOrderId(orderId)
+        );
+    }
+
 }

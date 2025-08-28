@@ -1,5 +1,6 @@
 package com.ecommerce.eshop.ordermodule.service;
 
+import com.ecommerce.eshop.ordermodule.dto.OrderDetailsDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderRequestDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderSummaryDTO;
@@ -32,4 +33,6 @@ public interface OrderService {
             String from,
             String to
     );
+
+    OrderDetailsDTO getOrderDetailsByOrderId(Long orderId);
 }

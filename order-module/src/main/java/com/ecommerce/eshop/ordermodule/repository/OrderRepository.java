@@ -1,16 +1,15 @@
 package com.ecommerce.eshop.ordermodule.repository;
 
+import com.ecommerce.eshop.ordermodule.dto.OrderLocationDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderSummaryDTO;
 import com.ecommerce.eshop.ordermodule.entity.Order;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.stereotype.Repository;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -65,5 +64,46 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("from") Timestamp from,
             @Param("to") Timestamp to
     );
+
+    @Query(value = """
+            SELECT o.id                                   as order_id,
+                   CONCAT(u.first_name, ' ', u.last_name) AS customer_name,
+                   u.phone_number                         as customer_phone_number,
+                   o.upazila_id                           as upazila_id,
+                   o.status                               as status,
+                   oi.product_id                          as product_id,
+                   oi.price                               as product_price,
+                   oi.quantity                            AS product_count,
+                   o.total_price                          as total_price,
+                   cast(o.creation_date as timestamp)     as creation_date
+            FROM orders o
+                     JOIN users u ON o.user_id = u.id
+                     LEFT JOIN order_items oi ON oi.order_id = o.id
+            WHERE
+                o.id = :orderId
+            """, nativeQuery = true)
+    Object findOrderDetailsByOrderId(
+            @Param("orderId") Long orderId
+    );
+
+    @Query(value = """
+            select upazilas.name     as upazilaName,
+                   districts.name    as districtName,
+                   divisions.name    as divisionName,
+                   upazilas.bn_name  as upazilaBnName,
+                   districts.bn_name as districtBnName,
+                   divisions.bn_name as divisionBnName,
+                   upazilas.id       as upazilaId,
+                   districts.id      as districtId,
+                   divisions.id      as divisionId
+            from upazilas
+                     join districts on upazilas.district_id = districts.id
+                     join divisions on districts.division_id = divisions.id
+            where upazilas.id = :upazilaId
+            """, nativeQuery = true)
+    Object getOrderLocationByUpazilaId(
+            @Param("upazilaId") Long upazilaId
+    );
+
 
 }
