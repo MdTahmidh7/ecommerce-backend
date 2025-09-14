@@ -19,8 +19,25 @@ public class RegistrationController {
 
     private final RegistrationService registrationService;
 
+
+    //create an api for new registration with phone number and send otp to that phone number
+    @PostMapping
+    public ResponseEntity<String> register(
+            @Valid @RequestBody ExtendedRegisterRequest registerRequest
+    ) {
+        try {
+            registrationService.register(registerRequest);
+            return ResponseEntity.ok("OTP sent successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
     @PostMapping("/send-otp")
-    public ResponseEntity<String> sendOtp(@Valid @RequestBody ExtendedRegisterRequest registerRequest) {
+    public ResponseEntity<String> sendOtp(
+            @Valid @RequestBody ExtendedRegisterRequest registerRequest
+    ) {
         try {
             registrationService.sendRegistrationOtp(registerRequest);
             return ResponseEntity.ok("OTP sent successfully.");
@@ -30,7 +47,9 @@ public class RegistrationController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<JwtResponseDTO> verifyOtpAndRegister(@Valid @RequestBody VerifyOtpAndRegisterRequest registerRequest) {
+    public ResponseEntity<JwtResponseDTO> verifyOtpAndRegister(
+            @Valid @RequestBody VerifyOtpAndRegisterRequest registerRequest
+    ) {
         try {
             JwtResponseDTO jwtResponseDTO = registrationService.verifyOtpAndRegister(registerRequest);
             return ResponseEntity.ok(jwtResponseDTO);

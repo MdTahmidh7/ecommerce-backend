@@ -27,6 +27,7 @@ public class RegistrationService {
     private final UserRepository userRepository;
 
     public void sendRegistrationOtp(ExtendedRegisterRequest registerRequest) {
+
         if (userRepository.existsByPhoneNumber(registerRequest.getPhoneNumber())) {
             throw new RuntimeException("Phone number is already in use!");
         }
@@ -35,6 +36,7 @@ public class RegistrationService {
 
     @Transactional
     public JwtResponseDTO verifyOtpAndRegister(VerifyOtpAndRegisterRequest extendedRequest) {
+
         if (!phoneOtpService.verifyOtp(extendedRequest.getPhoneNumber(), extendedRequest.getOtp())) {
             throw new RuntimeException("Invalid or expired OTP.");
         }
@@ -44,7 +46,7 @@ public class RegistrationService {
         authRequest.setPhoneNumber(extendedRequest.getPhoneNumber());
         authRequest.setFirstName(extendedRequest.getFirstName());
         authRequest.setLastName(extendedRequest.getLastName());
-        authRequest.setAddress(extendedRequest.getAddress());
+        //authRequest.setAddress(extendedRequest.getAddress());
         authRequest.setPassword(UUID.randomUUID().toString()); // Generate a random password
 
         // 2. Call the AuthService directly to register the user
@@ -63,5 +65,39 @@ public class RegistrationService {
         return new JwtResponseDTO(jwt, newUser.getId(), newUser.getPhoneNumber(), roles,
                 newUser.getFirstName(), newUser.getLastName(),
                 newUser.getAddress());
+    }
+
+    public void register(ExtendedRegisterRequest extendedRequest) {
+
+        if (userRepository.existsByPhoneNumber(extendedRequest.getPhoneNumber())) {
+            throw new RuntimeException("Phone number is already in use!");
+        }
+
+        //register user and save
+        RegisterRequestDTO authRequest = new RegisterRequestDTO();
+        authRequest.setPhoneNumber(extendedRequest.getPhoneNumber());
+        authRequest.setFirstName(extendedRequest.getFirstName());
+        authRequest.setLastName(extendedRequest.getLastName());
+        //authRequest.setAddress(extendedRequest.getAddress());
+        authRequest.setPassword(UUID.randomUUID().toString()); // Generate a random password
+
+        // 2. Call the AuthService directly to register the user
+        User newUser = authService.registerUser(authRequest);
+
+        // 3. Create the user profile in the e-commerce backend
+        userProfileService.createOrUpdateProfile(newUser.getId(), extendedRequest.getUpazilaId());
+
+        // 4. Generate JWT token
+        //String jwt = jwtService.generateToken(newUser);
+
+//        List<String> roles = newUser
+//                .getAuthorities()
+//                .stream()
+//                .map(Object::toString)
+//                .toList();
+
+
+        phoneOtpService.sendOtp(extendedRequest.getPhoneNumber());
+
     }
 }

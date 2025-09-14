@@ -13,11 +13,8 @@ public class ExtendedRegisterRequest {
     private String phoneNumber;
 
     private String firstName;
-    private String lastName;
 
-    @NotBlank
-    @Size(max = 500)
-    private String address;
+    private String lastName;
 
     @NotNull(message = "Upazila ID is required")
     private Integer upazilaId;

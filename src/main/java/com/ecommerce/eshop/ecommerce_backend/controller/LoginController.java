@@ -31,7 +31,9 @@ public class LoginController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<JwtResponseDTO> verifyOtpAndLogin(@Valid @RequestBody VerifyOtpLoginRequest verifyOtpLoginRequest) {
+    public ResponseEntity<JwtResponseDTO> verifyOtpAndLogin(
+            @Valid @RequestBody VerifyOtpLoginRequest verifyOtpLoginRequest
+    ) {
         try {
             JwtResponseDTO jwtResponseDTO = loginService.verifyOtpAndLogin(verifyOtpLoginRequest);
             return ResponseEntity.ok(jwtResponseDTO);
