@@ -80,19 +80,67 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderResponseDTO> getAllOrders(
-            OrderStatus status,
-            LocalDate startDate,
-            LocalDate endDate,
+    public List<OrderSummaryDTO> getAllOrders(
+            OrderStatus orderStatus,
+            String from,
+            String to,
             Long userId
     ) {
 
-        List<Order> orders = orderRepository.findByUserId(userId);
+        Timestamp fromTs = null;
+        Timestamp toTs = null;
 
-        return orders
-                .stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
+        if (from != null && to != null) {
+             fromTs = Timestamp.valueOf(from + " 00:00:00");
+             toTs = Timestamp.valueOf(to + " 23:59:59");
+        }
+
+
+        String orderStatusStr = orderStatus != null ? orderStatus.name() : null;
+
+        List<Object[]> results = orderRepository.findAllOrderSummariesForUserNative(
+                userId,
+                orderStatusStr,
+                fromTs,
+                toTs
+        );
+
+        return results.stream()
+                .map(row -> {
+                    Long orderId = ((Number) row[0]).longValue();
+                    String customerName = (String) row[1];
+                    String customerPhone = (String) row[2];
+                    BigDecimal totalPrice = (BigDecimal) row[3];
+                    OrderStatus status = OrderStatus.valueOf((String) row[4]);
+
+                    // Handle Instant/Timestamp
+                    Instant creationDate;
+                    Object creationVal = row[5];
+                    if (creationVal instanceof Timestamp ts) {
+                        creationDate = ts.toInstant();
+                    } else if (creationVal instanceof Instant inst) {
+                        creationDate = inst;
+                    } else {
+                        throw new IllegalStateException("Unexpected type for creationDate: " + creationVal);
+                    }
+
+                    Integer totalItems = ((Number) row[6]).intValue();
+                    Long productId = row[7] != null ? (Long)row[7] : null;
+
+                    return new OrderSummaryDTO(
+                            orderId,
+                            customerName,
+                            customerPhone,
+                            null,
+                            status,
+                            productId,
+                            null,
+                            totalItems,
+                            totalPrice,
+                            creationDate
+                    );
+                })
+                .toList();
     }
 
     @Override

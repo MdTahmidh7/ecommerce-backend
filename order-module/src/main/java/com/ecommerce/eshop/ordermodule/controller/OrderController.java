@@ -42,19 +42,12 @@ public class OrderController {
         return ResponseEntity.ok(orderService.createOrder(orderRequestDTO, user.getId()));
     }
 
-//    @PutMapping("/{orderId}/status")
-//    public ResponseEntity<OrderDetailsDTO> updateOrderStatus(
-//            @PathVariable Long orderId,
-//            @RequestParam OrderStatus newStatus
-//    ) {
-//        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, newStatus));
-//    }
 
-    @GetMapping
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersForUser(
-            @RequestParam(required = false) OrderStatus status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    @GetMapping("/me")
+    public ResponseEntity<List<OrderSummaryDTO>> getAllOrdersForUser(
+            @Param("status") OrderStatus status,
+            @Param("from") String from,
+            @Param("to") String to
     ) {
 
         User user = (User) SecurityContextHolder
@@ -66,10 +59,10 @@ public class OrderController {
             return ResponseEntity.badRequest().build();
         }
 
-        List<OrderResponseDTO> orders = orderService.getAllOrders(
+        List<OrderSummaryDTO> orders = orderService.getAllOrders(
                 status,
-                startDate,
-                endDate,
+                from,
+                to,
                 user.getId()
         );
 

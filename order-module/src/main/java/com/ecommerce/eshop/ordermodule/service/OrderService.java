@@ -21,7 +21,12 @@ public interface OrderService {
             OrderStatus newStatus
     );
 
-    List<OrderResponseDTO> getAllOrders(OrderStatus status, LocalDate startDate, LocalDate endDate, Long userId);
+    List<OrderSummaryDTO> getAllOrders(
+            OrderStatus status,
+            String startDate,
+            String endDate,
+            Long userId
+    );
 
     Page<OrderResponseDTO> getAllOrdersForAdmin(
             OrderStatus status,
