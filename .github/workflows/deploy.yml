@@ -20,7 +20,7 @@ jobs:
 
       - name: Copy project files to VM
         run: |
-          rsync -avz --delete ./ ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/${{ secrets.VM_USER }}/app
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./ ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/${{ secrets.VM_USER }}/app
 
       - name: Deploy with Docker Compose
         run: |
