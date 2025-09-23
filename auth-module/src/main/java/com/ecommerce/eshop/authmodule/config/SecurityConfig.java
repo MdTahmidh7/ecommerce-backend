@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/login",
-                                "api/login/verify-otp",
+                                "/api/login/verify-otp",
                                 "/api/divisions",
                                 "/api/divisions/**",
                                 "/api/districts",
@@ -85,7 +85,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/api/otp/verify").permitAll()
-                        .requestMatchers(HttpMethod.POST, "api/login/verify-otp").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/login/verify-otp").permitAll()
                         .requestMatchers("/api/orders/**").authenticated()
                         // --- END ADDITION ---
 
