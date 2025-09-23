@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/register")
 @RequiredArgsConstructor
@@ -22,14 +24,16 @@ public class RegistrationController {
 
     //create an api for new registration with phone number and send otp to that phone number
     @PostMapping
-    public ResponseEntity<String> register(
+    public ResponseEntity<Map<String, String>> register(
             @Valid @RequestBody ExtendedRegisterRequest registerRequest
     ) {
         try {
             registrationService.register(registerRequest);
-            return ResponseEntity.ok("OTP sent successfully.");
+            Map<String, String> successResponse = Map.of("message", "OTP sent successfully.");
+            return ResponseEntity.ok(successResponse);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            Map<String, String> errorResponse = Map.of("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 
