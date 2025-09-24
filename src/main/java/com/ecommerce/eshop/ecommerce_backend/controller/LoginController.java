@@ -22,6 +22,7 @@ public class LoginController {
 
     private final LoginService loginService;
 
+
     @PostMapping
     public ResponseEntity<Map<String, String>> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
