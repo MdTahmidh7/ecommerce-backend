@@ -80,67 +80,67 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderSummaryDTO> getAllOrders(
+    public Page<OrderSummaryDTO> getAllOrders(
             OrderStatus orderStatus,
             String from,
             String to,
-            Long userId
+            Long userId,
+            Pageable pageable
     ) {
-
         Timestamp fromTs = null;
         Timestamp toTs = null;
 
         if (from != null && to != null) {
-             fromTs = Timestamp.valueOf(from + " 00:00:00");
-             toTs = Timestamp.valueOf(to + " 23:59:59");
+            fromTs = Timestamp.valueOf(from + " 00:00:00");
+            toTs = Timestamp.valueOf(to + " 23:59:59");
         }
-
 
         String orderStatusStr = orderStatus != null ? orderStatus.name() : null;
 
-        List<Object[]> results = orderRepository.findAllOrderSummariesForUserNative(
+        Page<Object[]> results = orderRepository.findAllOrderSummariesForUserNative(
                 userId,
                 orderStatusStr,
                 fromTs,
-                toTs
+                toTs,
+                pageable
         );
 
-        return results.stream()
-                .map(row -> {
-                    Long orderId = ((Number) row[0]).longValue();
-                    String customerName = (String) row[1];
-                    String customerPhone = (String) row[2];
-                    BigDecimal totalPrice = (BigDecimal) row[3];
-                    OrderStatus status = OrderStatus.valueOf((String) row[4]);
+        // Correctly map the Page<Object[]> to a Page<OrderSummaryDTO>
+        return results.map(row -> {
+            Long orderId = ((Number) row[0]).longValue();
+            String customerName = (String) row[1];
+            String customerPhone = (String) row[2];
+            BigDecimal totalPrice = (BigDecimal) row[3];
+            OrderStatus status = OrderStatus.valueOf((String) row[4]);
 
-                    // Handle Instant/Timestamp
-                    Instant creationDate;
-                    Object creationVal = row[5];
-                    if (creationVal instanceof Timestamp ts) {
-                        creationDate = ts.toInstant();
-                    } else if (creationVal instanceof Instant inst) {
-                        creationDate = inst;
-                    } else {
-                        throw new IllegalStateException("Unexpected type for creationDate: " + creationVal);
-                    }
+            // Handle Instant/Timestamp
+            Instant creationDate;
+            Object creationVal = row[5];
+            if (creationVal instanceof Timestamp ts) {
+                creationDate = ts.toInstant();
+            } else if (creationVal instanceof Instant inst) {
+                creationDate = inst;
+            } else {
+                throw new IllegalStateException("Unexpected type for creationDate: " + creationVal);
+            }
 
-                    Integer totalItems = ((Number) row[6]).intValue();
-                    Long productId = row[7] != null ? (Long)row[7] : null;
+            Integer totalItems = ((Number) row[6]).intValue();
+            // Use Number to safely handle different numeric types
+            Long productId = row[7] != null ? ((Number) row[7]).longValue() : null;
 
-                    return new OrderSummaryDTO(
-                            orderId,
-                            customerName,
-                            customerPhone,
-                            null,
-                            status,
-                            productId,
-                            null,
-                            totalItems,
-                            totalPrice,
-                            creationDate
-                    );
-                })
-                .toList();
+            return new OrderSummaryDTO(
+                    orderId,
+                    customerName,
+                    customerPhone,
+                    null,
+                    status,
+                    productId,
+                    null,
+                    totalItems,
+                    totalPrice,
+                    creationDate
+            );
+        });
     }
 
     @Override

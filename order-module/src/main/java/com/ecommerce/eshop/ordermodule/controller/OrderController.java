@@ -9,6 +9,7 @@ import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
 import com.ecommerce.eshop.ordermodule.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,10 +45,11 @@ public class OrderController {
 
 
     @GetMapping("/me")
-    public ResponseEntity<List<OrderSummaryDTO>> getAllOrdersForUser(
+    public ResponseEntity<Page<OrderSummaryDTO>> getAllOrdersForUser(
             @Param("status") OrderStatus status,
             @Param("from") String from,
-            @Param("to") String to
+            @Param("to") String to,
+            @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
 
         User user = (User) SecurityContextHolder
@@ -59,11 +61,12 @@ public class OrderController {
             return ResponseEntity.badRequest().build();
         }
 
-        List<OrderSummaryDTO> orders = orderService.getAllOrders(
+        Page<OrderSummaryDTO> orders = orderService.getAllOrders(
                 status,
                 from,
                 to,
-                user.getId()
+                user.getId(),
+                pageable
         );
 
         return ResponseEntity.ok(orders);

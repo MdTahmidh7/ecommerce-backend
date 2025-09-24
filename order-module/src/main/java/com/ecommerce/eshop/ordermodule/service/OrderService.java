@@ -21,11 +21,12 @@ public interface OrderService {
             OrderStatus newStatus
     );
 
-    List<OrderSummaryDTO> getAllOrders(
+    Page<OrderSummaryDTO> getAllOrders(
             OrderStatus status,
             String startDate,
             String endDate,
-            Long userId
+            Long userId,
+            Pageable pageable
     );
 
     Page<OrderResponseDTO> getAllOrdersForAdmin(
