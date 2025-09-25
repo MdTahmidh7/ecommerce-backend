@@ -37,10 +37,11 @@ public interface OrderService {
             Pageable pageable
     );
 
-    List<OrderSummaryDTO> getAllOrderSummaries(
+    Page<OrderSummaryDTO> getAllOrderSummaries(
             OrderStatus orderStatus,
             String from,
-            String to
+            String to,
+            Pageable pageable
     );
 
     OrderDetailsDTO getOrderDetailsByOrderId(Long orderId);

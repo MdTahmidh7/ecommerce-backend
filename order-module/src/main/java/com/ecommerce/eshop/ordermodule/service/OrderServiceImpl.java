@@ -228,10 +228,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // Lightweight method for list view
-    public List<OrderSummaryDTO> getAllOrderSummaries(
+    public Page<OrderSummaryDTO> getAllOrderSummaries(
             OrderStatus orderStatus,
             String from,
-            String to
+            String to,
+            Pageable pageable
     ) {
 
         Timestamp fromTs = Timestamp.valueOf(from + " 00:00:00");
@@ -239,10 +240,11 @@ public class OrderServiceImpl implements OrderService {
 
         String orderStatusStr = orderStatus != null ? orderStatus.name() : null;
 
-        List<Object[]> results = orderRepository.findAllOrderSummariesNative(
+        Page<Object[]> results = orderRepository.findAllOrderSummariesNative(
                 orderStatusStr,
                 fromTs,
-                toTs
+                toTs,
+                pageable
         );
 
         return results.stream()
@@ -280,7 +282,12 @@ public class OrderServiceImpl implements OrderService {
                             creationDate
                     );
                 })
-                .toList();
+                .collect(Collectors
+                        .collectingAndThen(
+                                Collectors.toList(), list ->
+                                new PageImpl<>(list, pageable, results.getTotalElements())
+                        )
+                );
     }
 
     @Override
