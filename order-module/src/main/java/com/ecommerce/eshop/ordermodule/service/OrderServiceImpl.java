@@ -173,7 +173,7 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .collect(Collectors.toMap(
                         User::getId,
-                        user -> user.getFirstName() + " " + user.getLastName()
+                        user -> user.getName()
                 ));
         //add userName from userIdToNameMap
 

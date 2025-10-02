@@ -79,8 +79,7 @@ public class JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userDetails.getId());
         claims.put("phoneNumber", userDetails.getUsername());
-        claims.put("firstName", userDetails.getFirstName());
-        claims.put("lastName", userDetails.getLastName());
+        claims.put("name", userDetails.getName());
         claims.put("roles", userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()));

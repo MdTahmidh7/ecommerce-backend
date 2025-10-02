@@ -44,8 +44,7 @@ public class RegistrationService {
         // 1. Create the DTO for the auth-module
         RegisterRequestDTO authRequest = new RegisterRequestDTO();
         authRequest.setPhoneNumber(extendedRequest.getPhoneNumber());
-        authRequest.setFirstName(extendedRequest.getFirstName());
-        authRequest.setLastName(extendedRequest.getLastName());
+        authRequest.setName(extendedRequest.getName());
         //authRequest.setAddress(extendedRequest.getAddress());
         authRequest.setPassword(UUID.randomUUID().toString()); // Generate a random password
 
@@ -62,9 +61,14 @@ public class RegistrationService {
                 .map(Object::toString)
                 .collect(Collectors.toList());
 
-        return new JwtResponseDTO(jwt, newUser.getId(), newUser.getPhoneNumber(), roles,
-                newUser.getFirstName(), newUser.getLastName(),
-                newUser.getAddress());
+        return new JwtResponseDTO(
+                jwt,
+                newUser.getId(),
+                newUser.getPhoneNumber(),
+                roles,
+                newUser.getName(),
+                newUser.getAddress()
+        );
     }
 
     public void register(ExtendedRegisterRequest extendedRequest) {
@@ -76,8 +80,7 @@ public class RegistrationService {
         //register user and save
         RegisterRequestDTO authRequest = new RegisterRequestDTO();
         authRequest.setPhoneNumber(extendedRequest.getPhoneNumber());
-        authRequest.setFirstName(extendedRequest.getFirstName());
-        authRequest.setLastName(extendedRequest.getLastName());
+        authRequest.setName(extendedRequest.getName());
         //authRequest.setAddress(extendedRequest.getAddress());
         authRequest.setPassword(UUID.randomUUID().toString()); // Generate a random password
         authRequest.setDistrictName(extendedRequest.getDistrictName());
