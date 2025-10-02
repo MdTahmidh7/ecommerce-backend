@@ -33,6 +33,10 @@ public class Order {
 
     private Instant creationDate;
 
+    private String districtName;
+
+    private String upazilaName;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
 }

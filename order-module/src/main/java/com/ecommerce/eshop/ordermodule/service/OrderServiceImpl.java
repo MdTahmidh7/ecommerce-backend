@@ -40,6 +40,8 @@ public class OrderServiceImpl implements OrderService {
         order.setUserId(userId);
         order.setUpazilaId(orderRequestDTO.getUpazilaId());
         order.setStatus(OrderStatus.PENDING);
+        order.setDistrictName(orderRequestDTO.getDistrictName());
+        order.setUpazilaName(orderRequestDTO.getUpazilaName());
         order.setCreationDate(Instant.now());
 
         order.setOrderItems(orderRequestDTO.getOrderItems().stream().map(orderItemDTO -> {

@@ -11,6 +11,7 @@ public class ExtendedRegisterRequest {
     @Size(max = 20)
     private String phoneNumber;
 
+    @NotBlank
     private String name;
 
     private Integer upazilaId;
