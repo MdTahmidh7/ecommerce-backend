@@ -2,9 +2,13 @@ package com.ecommerce.eshop.authmodule.service; // Updated package
 
 import com.ecommerce.eshop.authmodule.entity.User;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,6 +22,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class JwtService {
 
     // These values will be configured in the main application's application.properties
@@ -37,24 +42,27 @@ public class JwtService {
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
+        // Check if the token was valid and claims were successfully extracted
+        if (claims == null) {
+            return null;
+        }
         return claimsResolver.apply(claims);
     }
 
-//    private Claims extractAllClaims(String token) {
-//        return Jwts
-//                .parserBuilder()
-//                .setSigningKey(getSignInKey())
-//                .build()
-//                .parseClaimsJws(token)
-//                .getBody();
-//    }
-
     private Claims extractAllClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(getSignInKey())  // Changed from setSigningKey() in older versions
-                .build()
-                .parseSignedClaims(token)    // Changed from parseClaimsJws()
-                .getPayload();               // Changed from getBody()
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSignInKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (ExpiredJwtException e) {
+            log.warn("Token has expired: {}", e.getMessage());
+            return null;
+        } catch (SignatureException | MalformedJwtException | IllegalArgumentException e) {
+            log.warn("Invalid/Malformed Token: {}", e.getMessage());
+            return null;
+        }
     }
 
     private Boolean isTokenExpired(String token) {
@@ -79,16 +87,6 @@ public class JwtService {
 
         return createToken(claims, userDetails.getUsername());
     }
-
-//    private String createToken(Map<String, Object> claims, String subject) {
-//        return Jwts.builder()
-//                .setClaims(claims)
-//                .setSubject(subject)
-//                .setIssuedAt(new Date(System.currentTimeMillis()))
-//                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-//                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
-//                .compact();
-//    }
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()

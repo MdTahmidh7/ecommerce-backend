@@ -34,13 +34,18 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final JwtAuthenticationEntryPoint entryPoint;
 
 
-    public SecurityConfig(JwtAuthFilter jwtAuthFilter,
-                          CustomUserDetailsService userDetailsService
+
+    public SecurityConfig(
+            JwtAuthFilter jwtAuthFilter,
+            CustomUserDetailsService userDetailsService,
+            JwtAuthenticationEntryPoint entryPoint
     ) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
+        this.entryPoint = entryPoint;
     }
 
     @Value("${app.cors.allowed-origins}")
@@ -92,8 +97,11 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .exceptionHandling(
+                        exceptions -> exceptions.authenticationEntryPoint(entryPoint) // 2. Tell Spring to use your custom entry point
+                )
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

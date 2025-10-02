@@ -11,7 +11,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,16 +33,22 @@ public class OrderController {
     public ResponseEntity<OrderResponseDTO> createOrder(
             @RequestBody OrderRequestDTO orderRequestDTO
     ) {
-
-        User user = (User) SecurityContextHolder
+        Object principal = SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        if (user == null) {
-            return ResponseEntity.badRequest().build();
+        // Check if the principal is of the expected type (your User entity)
+        if (principal instanceof User user) {
+            // Safely use the casted User object
+            return ResponseEntity.ok(orderService.createOrder(orderRequestDTO, user.getId()));
+        } else {
+            // This is a safety catch. If we reach here, it means the request was
+            // unauthenticated but somehow bypassed the filter chain's initial block.
+            // Returning 401 here is the last resort.
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return ResponseEntity.ok(orderService.createOrder(orderRequestDTO, user.getId()));
+        //return ResponseEntity.ok(orderService.createOrder(orderRequestDTO, user.getId()));
     }
 
 
