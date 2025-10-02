@@ -69,7 +69,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = """
                 SELECT o.id                                   as order_id,
-                       CONCAT(u.first_name, ' ', u.last_name) AS customer_name,
+                       u.name                                 as customer_name,
                        u.phone_number                         as customer_phone_number,
                        o.total_price                          as total_price,
                        o.status                               as status,
