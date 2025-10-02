@@ -96,16 +96,18 @@ public class OrderController {
 
     // Returns lightweight summaries
     @GetMapping("/all")
-    public ResponseEntity<List<OrderSummaryDTO>> getAllOrders(
+    public ResponseEntity<Page<OrderSummaryDTO>> getAllOrders(
             @Param("status") OrderStatus status,
             @Param("from") String from,
-            @Param("to") String to
+            @Param("to") String to,
+            @PageableDefault(page = 0, size = 10) Pageable pageable
     ) {
 
         return ResponseEntity.ok(orderService.getAllOrderSummaries(
                 status,
                 from,
-                to
+                to,
+                pageable
         ));
     }
 

@@ -59,10 +59,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                     AND o.creation_date <= COALESCE(:to, o.creation_date)
                 ORDER BY o.creation_date DESC;
             """, nativeQuery = true)
-    List<Object[]> findAllOrderSummariesNative(
+    Page<Object[]> findAllOrderSummariesNative(
             @Param("status") String status,
             @Param("from") Timestamp from,
-            @Param("to") Timestamp to
+            @Param("to") Timestamp to,
+            Pageable pageable
     );
 
 
