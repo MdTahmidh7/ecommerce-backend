@@ -80,6 +80,8 @@ public class RegistrationService {
         authRequest.setLastName(extendedRequest.getLastName());
         //authRequest.setAddress(extendedRequest.getAddress());
         authRequest.setPassword(UUID.randomUUID().toString()); // Generate a random password
+        authRequest.setDistrictName(extendedRequest.getDistrictName());
+        authRequest.setUpazilaName(extendedRequest.getUpazilaName());
 
         // 2. Call the AuthService directly to register the user
         User newUser = authService.registerUser(authRequest);

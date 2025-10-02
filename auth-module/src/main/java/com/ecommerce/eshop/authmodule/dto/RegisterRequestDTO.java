@@ -20,11 +20,13 @@ public class RegisterRequestDTO {
     private String password;
 
     private String firstName;
+
     private String lastName;
 
-    // --- Single Address field added to RegisterRequest ---
-    @NotBlank // Example: making address mandatory for registration
     @Size(max = 500)
     private String address;
-    // --- End address field ---
+
+    private String districtName;
+
+    private String upazilaName;
 }

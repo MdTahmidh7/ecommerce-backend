@@ -56,8 +56,9 @@ public class AuthService {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setEnabled(true);
-
         user.setAddress(request.getAddress());
+        user.setDistrictName(request.getDistrictName());
+        user.setUpazilaName(request.getUpazilaName());
 
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository
@@ -79,12 +80,20 @@ public class AuthService {
         User userDetails = (User) authentication.getPrincipal();
         String jwt = jwtService.generateToken(userDetails);
 
-        List<String> roles = userDetails.getAuthorities().stream()
+        List<String> roles = userDetails
+                .getAuthorities()
+                .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        return new JwtResponseDTO(jwt, userDetails.getId(), userDetails.getPhoneNumber(), roles,
-                userDetails.getFirstName(), userDetails.getLastName(),
-                userDetails.getAddress());
+        return new JwtResponseDTO(
+                jwt,
+                userDetails.getId(),
+                userDetails.getPhoneNumber(),
+                roles,
+                userDetails.getFirstName(),
+                userDetails.getLastName(),
+                userDetails.getAddress()
+        );
     }
 }

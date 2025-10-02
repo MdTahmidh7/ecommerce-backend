@@ -69,6 +69,12 @@ public class User implements UserDetails {
     private String address;
     // --- End address field ---
 
+    @Column(name = "district_name")
+    private String districtName;
+
+    @Column(name = "upazila_name")
+    private String upazilaName;
+
     // Constructor for registration - now includes phone number
     public User(String phoneNumber, String password) {
         this.phoneNumber = phoneNumber;

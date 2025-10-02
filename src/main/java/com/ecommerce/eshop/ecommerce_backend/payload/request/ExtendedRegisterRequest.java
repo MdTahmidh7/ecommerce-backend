@@ -18,4 +18,8 @@ public class ExtendedRegisterRequest {
 
     @NotNull(message = "Upazila ID is required")
     private Integer upazilaId;
+
+    private String districtName;
+
+    private String UpazilaName;
 }
