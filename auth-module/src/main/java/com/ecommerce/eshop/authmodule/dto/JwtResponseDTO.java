@@ -15,24 +15,22 @@ public class JwtResponseDTO {
     private Long id;
     private String phoneNumber;
     private List<String> roles;
-    private String firstName;
-    private String lastName;
+    private String name;
     private String address;
 
-    public JwtResponseDTO(String accessToken,
-                          Long id,
-                          String phoneNumber,
-                          List<String> roles,
-                          String firstName,
-                          String lastName,
-                          String address
+    public JwtResponseDTO(
+            String accessToken,
+            Long id,
+            String phoneNumber,
+            List<String> roles,
+            String name,
+            String address
     ) {
         this.token = accessToken;
         this.id = id;
         this.phoneNumber = phoneNumber;
         this.roles = roles;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.name = name;
         this.address = address;
     }
 }

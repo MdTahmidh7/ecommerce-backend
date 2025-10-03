@@ -65,8 +65,7 @@ public class LoginServiceImpl implements LoginService {
                 user.getId(),
                 user.getPhoneNumber(),
                 roles,
-                user.getFirstName(),
-                user.getLastName(),
+                user.getName(),
                 user.getAddress()
         );
     }

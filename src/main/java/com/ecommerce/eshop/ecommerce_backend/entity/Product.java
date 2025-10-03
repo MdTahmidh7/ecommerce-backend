@@ -36,7 +36,7 @@ public class Product {
     @Size(max = 255)
     private String name;
 
-    @Size(max = 1000)
+    @Size(max = 10000)
     private String description;
 
     @NotNull

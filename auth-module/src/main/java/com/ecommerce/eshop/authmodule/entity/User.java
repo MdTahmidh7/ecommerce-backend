@@ -38,17 +38,11 @@ public class User implements UserDetails {
     // @Pattern(regexp = "^\\+?[0-9. ()-]{7,25}$", message = "Invalid phone number")
     private String phoneNumber;
 
-    @NotBlank
-    @Size(max = 120)
-    private String password;
 
-    @Size(max = 100)
-    @Column(name = "first_name")
-    private String firstName;
 
-    @Size(max = 100)
-    @Column(name = "last_name")
-    private String lastName;
+    @Size(max = 200)
+    @Column(name = "name")
+    private String name;
 
     private boolean enabled = true;
 
@@ -76,9 +70,8 @@ public class User implements UserDetails {
     private String upazilaName;
 
     // Constructor for registration - now includes phone number
-    public User(String phoneNumber, String password) {
+    public User(String phoneNumber) {
         this.phoneNumber = phoneNumber;
-        this.password = password;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
@@ -89,6 +82,11 @@ public class User implements UserDetails {
         return this.roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName().name()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return null;
     }
 
     @Override

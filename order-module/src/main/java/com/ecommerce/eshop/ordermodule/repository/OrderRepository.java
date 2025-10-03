@@ -43,7 +43,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Lightweight query for list view
     @Query(value = """
                 SELECT o.id                                   as order_id,
-                       CONCAT(u.first_name, ' ', u.last_name) AS customer_name,
+                       u.name                                 as customer_name,
                        u.phone_number                         as customer_phone_number,
                        o.total_price                          as total_price,
                        o.status                               as status,
@@ -69,7 +69,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = """
                 SELECT o.id                                   as order_id,
-                       CONCAT(u.first_name, ' ', u.last_name) AS customer_name,
+                       u.name                                 as customer_name,
                        u.phone_number                         as customer_phone_number,
                        o.total_price                          as total_price,
                        o.status                               as status,
@@ -97,7 +97,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query(value = """
             SELECT o.id                                   as order_id,
-                   CONCAT(u.first_name, ' ', u.last_name) AS customer_name,
+                   u.name                                 as customer_name,
                    u.phone_number                         as customer_phone_number,
                    o.upazila_id                           as upazila_id,
                    o.status                               as status,
@@ -105,7 +105,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
                    oi.price                               as product_price,
                    oi.quantity                            AS product_count,
                    o.total_price                          as total_price,
-                   cast(o.creation_date as timestamp)     as creation_date
+                   cast(o.creation_date as timestamp)     as creation_date,
+                   o.district_name                       as district_name,
+                   o.upazila_name                        as upazila_name
             FROM orders o
                      JOIN users u ON o.user_id = u.id
                      LEFT JOIN order_items oi ON oi.order_id = o.id

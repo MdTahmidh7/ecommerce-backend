@@ -1,7 +1,6 @@
 package com.ecommerce.eshop.ecommerce_backend.payload.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -12,11 +11,9 @@ public class ExtendedRegisterRequest {
     @Size(max = 20)
     private String phoneNumber;
 
-    private String firstName;
+    @NotBlank
+    private String name;
 
-    private String lastName;
-
-    @NotNull(message = "Upazila ID is required")
     private Integer upazilaId;
 
     private String districtName;

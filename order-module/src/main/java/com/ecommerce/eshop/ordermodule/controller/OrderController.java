@@ -7,6 +7,7 @@ import com.ecommerce.eshop.ordermodule.dto.OrderResponseDTO;
 import com.ecommerce.eshop.ordermodule.dto.OrderSummaryDTO;
 import com.ecommerce.eshop.ordermodule.entity.OrderStatus;
 import com.ecommerce.eshop.ordermodule.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
@@ -31,7 +32,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<OrderResponseDTO> createOrder(
-            @RequestBody OrderRequestDTO orderRequestDTO
+            @RequestBody @Valid OrderRequestDTO orderRequestDTO
     ) {
         Object principal = SecurityContextHolder
                 .getContext()

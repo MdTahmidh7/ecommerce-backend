@@ -19,9 +19,7 @@ public class RegisterRequestDTO {
     @Size(min = 6, max = 40)
     private String password;
 
-    private String firstName;
-
-    private String lastName;
+    private String name;
 
     @Size(max = 500)
     private String address;

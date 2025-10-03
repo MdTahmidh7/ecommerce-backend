@@ -52,9 +52,8 @@ public class AuthService {
             throw new RuntimeException("Phone number is already in use!");
         }
 
-        User user = new User(request.getPhoneNumber(), passwordEncoder.encode(request.getPassword()));
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
+        User user = new User(request.getPhoneNumber());
+        user.setName(request.getName());
         user.setEnabled(true);
         user.setAddress(request.getAddress());
         user.setDistrictName(request.getDistrictName());
@@ -91,8 +90,7 @@ public class AuthService {
                 userDetails.getId(),
                 userDetails.getPhoneNumber(),
                 roles,
-                userDetails.getFirstName(),
-                userDetails.getLastName(),
+                userDetails.getName(),
                 userDetails.getAddress()
         );
     }
