@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -62,7 +63,12 @@ public class ProductController {
      */
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> getAllProducts(
-            @PageableDefault(page = 0, size = 10, sort = "name") Pageable pageable
+            @PageableDefault(
+                    page = 0,
+                    size = 10,
+                    sort = "createdAt",
+                    direction = Sort.Direction.DESC
+            ) Pageable pageable
     ) {
         Page<ProductResponse> products = productService.getAllProducts(pageable);
         return ResponseEntity.ok(products);
@@ -81,7 +87,7 @@ public class ProductController {
      * Updates an existing product and optionally replaces images
      */
     @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
             @RequestPart("product") String productRequestString,
@@ -89,9 +95,16 @@ public class ProductController {
             @RequestParam(value = "keepExistingImages", defaultValue = "false") boolean keepExistingImages
     ) {
         try {
-            ProductRequest productRequest = objectMapper.readValue(productRequestString, ProductRequest.class);
+            ProductRequest productRequest = objectMapper.readValue(
+                    productRequestString,
+                    ProductRequest.class
+            );
             ProductResponse updatedProduct = productService.updateProductWithImages(
-                    id, productRequest, images, keepExistingImages);
+                    id,
+                    productRequest,
+                    images,
+                    keepExistingImages
+            );
             return ResponseEntity.ok(updatedProduct);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

@@ -187,21 +187,33 @@ public class ProductServiceImpl implements ProductService {
     ) {
 
         Product product = productRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found or is deleted with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Product not found or is deleted with ID: " + id)
+                );
 
         // Validate name uniqueness
         productRepository.findByName(productRequest.getName())
                 .filter(p -> !p.getId().equals(id) && !p.isDeleted())
                 .ifPresent(p -> {
-                    throw new IllegalArgumentException("Product with name '" + productRequest.getName() + "' already exists.");
+                    throw new IllegalArgumentException(
+                            "Product with name '" + productRequest.getName() + "' already exists."
+                    );
                 });
 
         // Get category
-        Category category = categoryService.getCategoryEntityById(productRequest.getCategoryId());
+        //Category category = categoryService.getCategoryEntityById(productRequest.getCategoryId());
 
         // Update product details
-        BeanUtils.copyProperties(productRequest, product, "id", "createdAt", "isDeleted", "imageUrl", "imageUrls");
-        product.setCategory(category);
+        BeanUtils.copyProperties(
+                productRequest,
+                product,
+                "id",
+                "createdAt",
+                "isDeleted",
+                "imageUrl",
+                "imageUrls"
+        );
+       // product.setCategory(category);
         product.setUpdatedAt(LocalDateTime.now());
 
         // Handle image updates
@@ -227,7 +239,7 @@ public class ProductServiceImpl implements ProductService {
 
         // Update product with image URLs
         if (!existingImageUrls.isEmpty()) {
-            product.setImageUrl(existingImageUrls.get(0)); // First image as primary
+            product.setImageUrl(existingImageUrls.getFirst()); // First image as primary
             product.setImageUrlsList(existingImageUrls);
         } else if (!keepExistingImages) {
             product.setImageUrl(null);

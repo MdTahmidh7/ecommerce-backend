@@ -16,21 +16,48 @@ public interface ProductService {
 
     ProductResponse getProductById(Long id);
 
-    Page<ProductResponse> findByCategoryId(Long categoryId, Pageable pageable);
+    Page<ProductResponse> findByCategoryId(
+            Long categoryId,
+            Pageable pageable
+    );
 
-    Page<ProductResponse> findByCategoryName(String categoryName, Pageable pageable);
+    Page<ProductResponse> findByCategoryName(
+            String categoryName,
+            Pageable pageable
+    );
 
-    Page<ProductResponse> findByNameContainingIgnoreCase(String keyword, Pageable pageable);
+    Page<ProductResponse> findByNameContainingIgnoreCase(
+            String keyword,
+            Pageable pageable
+    );
 
-    ProductResponse updateProduct(Long id, ProductRequest productRequest);
+    ProductResponse updateProduct(
+            Long id,
+            ProductRequest productRequest
+    );
 
     void deleteProduct(Long id);
 
-    ProductResponse createProductWithImages(ProductRequest productRequest, List<MultipartFile> images);
+    ProductResponse createProductWithImages(
+            ProductRequest productRequest,
+            List<MultipartFile> images
+    );
 
-    ProductResponse updateProductWithImages(Long id, ProductRequest productRequest, List<MultipartFile> images, boolean keepExistingImages);
+    ProductResponse updateProductWithImages(
+            Long id,
+            ProductRequest productRequest,
+            List<MultipartFile> images,
+            boolean keepExistingImages
+    );
 
-    ProductResponse addProductImages(Long id, List<MultipartFile> images);
+    ProductResponse addProductImages(
+            Long id,
+            List<MultipartFile> images
+    );
 
-    ProductResponse removeProductImage(Long id, String imageUrl);
+    ProductResponse removeProductImage(
+            Long id,
+            String imageUrl
+    );
+
 }
