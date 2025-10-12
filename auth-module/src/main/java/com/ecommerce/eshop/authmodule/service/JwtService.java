@@ -80,9 +80,12 @@ public class JwtService {
         claims.put("userId", userDetails.getId());
         claims.put("phoneNumber", userDetails.getUsername());
         claims.put("name", userDetails.getName());
-        claims.put("roles", userDetails.getAuthorities().stream()
+        claims.put("roles", userDetails
+                .getAuthorities()
+                .stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList())
+        );
 
         return createToken(claims, userDetails.getUsername());
     }
