@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@Profile("prod")
+//@Profile("prod")
 public class BulkSmsSender implements SmsSender {
 
     @Value("${bulksms.api-key}")

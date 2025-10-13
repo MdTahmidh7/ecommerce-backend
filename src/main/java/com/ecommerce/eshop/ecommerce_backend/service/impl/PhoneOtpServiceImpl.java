@@ -1,14 +1,12 @@
 package com.ecommerce.eshop.ecommerce_backend.service.impl;
 
 import com.ecommerce.eshop.ecommerce_backend.entity.PhoneOtp;
-import com.ecommerce.eshop.ecommerce_backend.payload.request.ExtendedRegisterRequest;
 import com.ecommerce.eshop.ecommerce_backend.repository.PhoneOtpRepository;
 import com.ecommerce.eshop.ecommerce_backend.service.PhoneOtpService;
 import com.ecommerce.eshop.ecommerce_backend.service.SmsSender;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,44 +21,43 @@ public class PhoneOtpServiceImpl implements PhoneOtpService {
     private final PhoneOtpRepository phoneOtpRepository;
     private final SmsSender smsSender;
 
+    @Value("${otp.service.enabled}")
+    private boolean otpServiceEnabled;
+
+    @Value("${default.otp}")
+    private String defaultOtp;
 
 
     @Override
     public void sendOtp(String phoneNumber) {
-
         Optional<PhoneOtp> existingOtp = phoneOtpRepository.findByPhoneNumberAndIsUsedFalse(phoneNumber);
 
-        if (
-                existingOtp.isPresent() &&
-                existingOtp.get().getExpiryTime().isAfter(LocalDateTime.now())
-        ) {
+        if (existingOtp.isPresent() && existingOtp.get().getExpiryTime().isAfter(LocalDateTime.now())) {
             throw new RuntimeException(
-                    "An active OTP already exists." +
-                    " Please wait 5 minutes before requesting a new one."
+                    "An active OTP already exists. " +
+                    "Please wait 5 minutes before requesting a new one."
             );
         }
 
         existingOtp.ifPresent(phoneOtpRepository::delete);
 
-        String otpCode = generateOtp();
+        String otpCode = otpServiceEnabled ? generateOtp() : defaultOtp;
+
         PhoneOtp phoneOtp = new PhoneOtp();
         phoneOtp.setPhoneNumber(phoneNumber);
         phoneOtp.setOtpCode(otpCode);
         phoneOtp.setExpiryTime(LocalDateTime.now().plusMinutes(5));
         phoneOtpRepository.save(phoneOtp);
-        //send otp to the user via SMS gateway
-        boolean sent = smsSender.sendSms(
-                phoneNumber,
-                "Your OTP is: " + otpCode + " (valid for 5 minutes)"
-        );
 
-        if (!sent) {
-            log.error("PhoneOtpServiceImpl -> Failed to send OTP SMS to {}", phoneNumber);
-            throw new RuntimeException("Failed to send OTP SMS. Please try again later.");
+        if (otpServiceEnabled) {
+            boolean sent = smsSender.sendSms(phoneNumber, "Your OTP is: " + otpCode + " (valid for 5 minutes)");
+            if (!sent) {
+                log.error("Failed to send OTP SMS to {}", phoneNumber);
+                throw new RuntimeException("Failed to send OTP SMS. Please try again later.");
+            }
+        } else {
+            log.info("OTP service disabled. Using default OTP for phone number {}: {}", phoneNumber, otpCode);
         }
-
-        // For now, log the OTP to the console
-        log.info("PhoneOtpServiceImpl -> OTP for phone number {} is: {}", phoneNumber, otpCode);
     }
 
     @Override
