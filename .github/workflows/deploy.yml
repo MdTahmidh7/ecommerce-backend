@@ -3,29 +3,37 @@ name: Deploy Spring Boot App
 on:
   push:
     branches:
-      - develop   # deploy when pushing to main
+      - develop   # Change to the branch you want to deploy from
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2️⃣ Set up SSH for GitHub Actions
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VM_SSH_KEY }}
 
-      - name: Copy project files to VM
+      # 3️⃣ Copy project files to VPS
+      - name: Copy project files to VPS
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./ ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}:/home/${{ secrets.VM_USER }}/app
 
-      - name: Deploy with Docker Compose
+      # 4️⃣ Deploy backend using Docker Compose
+      - name: Deploy backend
         run: |
           ssh ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
-            cd ~/app
-            docker-compose down
-            docker-compose up -d --build
+            set -e
+            cd /home/${{ secrets.VM_USER }}/app
+            echo "Stopping existing containers..."
+            docker compose down
+            echo "Building and starting containers..."
+            docker compose up -d --build
+            echo "Deployment completed successfully!"
           EOF
