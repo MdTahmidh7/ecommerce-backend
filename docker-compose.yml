@@ -88,7 +88,7 @@ services:
 
       # JWT Configuration
       JWT_SECRET: SUxvdmVCYW5nbGFkZXNoSXRJc0FCZWF1dGlmdWxsQ291bnRyeQ==
-      JWT_EXPIRATION_MS: 3600000
+      JWT_EXPIRATION_MS: 86400000
 
       # Spring Profile
       SPRING_PROFILES_ACTIVE: docker
