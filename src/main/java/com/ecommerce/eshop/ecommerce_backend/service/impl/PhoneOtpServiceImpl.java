@@ -47,14 +47,17 @@ public class PhoneOtpServiceImpl implements PhoneOtpService {
         phoneOtp.setPhoneNumber(phoneNumber);
         phoneOtp.setOtpCode(otpCode);
         phoneOtp.setExpiryTime(LocalDateTime.now().plusMinutes(5));
-        phoneOtpRepository.save(phoneOtp);
+
 
         if (otpServiceEnabled) {
-            boolean sent = smsSender.sendSms(phoneNumber, "Your OTP is: " + otpCode + " (valid for 5 minutes)");
-            if (!sent) {
-                log.error("Failed to send OTP SMS to {}", phoneNumber);
-                throw new RuntimeException("Failed to send OTP SMS. Please try again later.");
+            boolean sent = smsSender.sendSms(phoneNumber, "Your shaheensanitary.com OTP is: " + otpCode + " (valid for 5 minutes)");
+            if (sent){
+                phoneOtpRepository.save(phoneOtp);
+                log.info("OTP SMS sent to {}: {}", phoneNumber, otpCode);
+                return;
             }
+            log.error("Failed to send OTP SMS to {}", phoneNumber);
+            throw new RuntimeException("Failed to send OTP SMS. Please try again later.");
         } else {
             log.info("OTP service disabled. Using default OTP for phone number {}: {}", phoneNumber, otpCode);
         }

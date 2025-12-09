@@ -1,16 +1,17 @@
 package com.ecommerce.eshop.ecommerce_backend.service.impl;
 
 import com.ecommerce.eshop.ecommerce_backend.service.SmsSender;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
-import org.springframework.http.*;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 //@Profile("prod")
@@ -27,23 +28,24 @@ public class BulkSmsSender implements SmsSender {
 
     @Override
     public boolean sendSms(String to, String message) {
-        String apiUrl = "https://bulksmsbd.net/api/smsapi";
+        String apiUrl = "http://bulksmsbd.net/api/smsapi";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        Map<String, String> params = new HashMap<>();
-        params.put("api_key", apiKey);
-        params.put("senderid", senderId);
-        params.put("number", to);
-        params.put("message", message);
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("api_key", apiKey);
+        params.add("senderid", senderId);
+        params.add("number", to);
+        params.add("message", message);
+        params.add("type", "text");
 
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(params, headers);
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
         try {
             String response = restTemplate.postForObject(apiUrl, request, String.class);
-            JsonNode json = objectMapper.readTree(response);
 
+            JsonNode json = objectMapper.readTree(response);
             int responseCode = json.get("response_code").asInt();
 
             if (responseCode == 202) {
