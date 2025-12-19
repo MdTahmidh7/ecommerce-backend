@@ -92,7 +92,7 @@ public class ProductController {
             @PathVariable Long id,
             @RequestPart("product") String productRequestString,
             @RequestPart(value = "images", required = false) List<MultipartFile> images,
-            @RequestParam(value = "keepExistingImages", defaultValue = "true") boolean keepExistingImages
+            @RequestParam(value = "keepExistingImages", defaultValue = "false") boolean keepExistingImages
     ) {
         try {
             ProductRequest productRequest = objectMapper.readValue(
