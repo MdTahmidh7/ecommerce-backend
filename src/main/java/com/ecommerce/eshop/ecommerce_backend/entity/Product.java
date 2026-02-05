@@ -61,6 +61,9 @@ public class Product {
     @NotNull(message = "Product must have a category")
     private Category category;
 
+    @Column(name = "youtube_link", length = 500)
+    private String youtubeLink;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

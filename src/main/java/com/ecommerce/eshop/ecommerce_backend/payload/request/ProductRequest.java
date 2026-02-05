@@ -35,4 +35,6 @@ public class ProductRequest {
     @NotNull(message = "Category ID is required")
     private Long categoryId; // We will link by category ID in the request
 
+    private String youtubeLink;
+
 }

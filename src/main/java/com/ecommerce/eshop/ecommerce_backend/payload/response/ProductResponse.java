@@ -19,5 +19,6 @@ public class ProductResponse {
     private String imageUrl;           // Primary image
     private List<String> imageUrls;    // All images
     private CategoryResponse category; // Nested CategoryResponse DTO
+    private String youtubeLink;
 
 }

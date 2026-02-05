@@ -50,6 +50,7 @@ public class PhoneOtpServiceImpl implements PhoneOtpService {
 
 
         if (otpServiceEnabled) {
+            // send sms with otp and save otp
             boolean sent = smsSender.sendSms(phoneNumber, "Your shaheensanitary.com OTP is: " + otpCode + " (valid for 5 minutes)");
             if (sent){
                 phoneOtpRepository.save(phoneOtp);
@@ -59,6 +60,8 @@ public class PhoneOtpServiceImpl implements PhoneOtpService {
             log.error("Failed to send OTP SMS to {}", phoneNumber);
             throw new RuntimeException("Failed to send OTP SMS. Please try again later.");
         } else {
+            // save default otp
+            phoneOtpRepository.save(phoneOtp);
             log.info("OTP service disabled. Using default OTP for phone number {}: {}", phoneNumber, otpCode);
         }
     }
