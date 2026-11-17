@@ -4,7 +4,22 @@ FROM eclipse-temurin:21-jdk-jammy AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the Gradle wrapper files and the build.gradle files for caching
+# Install curl and unzip
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Gradle 8.14 using curl instead of Gradle Wrapper
+RUN curl -4 -fL --retry 3 \
+    https://services.gradle.org/distributions/gradle-8.14-bin.zip \
+    -o /tmp/gradle.zip \
+    && unzip -q /tmp/gradle.zip -d /opt \
+    && rm /tmp/gradle.zip
+
+ENV GRADLE_HOME=/opt/gradle-8.14
+ENV PATH="${GRADLE_HOME}/bin:${PATH}"
+
+# Copy the Gradle wrapper files and build.gradle files for caching
 COPY gradlew .
 COPY gradle gradle
 COPY build.gradle .
@@ -14,33 +29,29 @@ COPY settings.gradle .
 COPY auth-module/build.gradle auth-module/
 COPY email-otp-module/build.gradle email-otp-module/
 
-# Copy the entire source code (after copying build files for caching optimization)
+# Copy the entire source code
 COPY . .
 
-# Grant execute permission to the Gradle wrapper script
-RUN chmod +x gradlew
+# Keep Gradle version consistent with the project wrapper
+RUN gradle --version
 
 # Build the Spring Boot application's fat JAR
-RUN ./gradlew bootJar -x test
+RUN gradle bootJar -x test --no-daemon
 
-# --- DEBUGGING STEP: CORRECTED path for ls command ---
-# Check the build/libs directory directly under /app
-RUN ls -lR build/libs/ || true
-# --- END DEBUGGING STEP ---
-
+# Verify generated JAR
+RUN ls -lh build/libs/
 
 # Stage 2: Create the final lean image
-FROM eclipse-temurin:21-jre-jammy
+FROM eclipse-temurin:21-jre-jammy AS runtime
 
 # Set the working directory in the final image
 WORKDIR /app
 
-# --- !!! IMPORTANT CORRECTION HERE !!! ---
-# The JAR is built directly into /app/build/libs/
+# Copy the generated JAR from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Expose the port your Spring Boot application listens on (default is 8080)
+# Expose the application port
 EXPOSE 8080
 
-# Define the command to run your application
+# Run the Spring Boot application
 ENTRYPOINT ["java", "-jar", "app.jar"]
